@@ -1,0 +1,223 @@
+'use client';
+
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import {
+  TrendingUp, Map, Layers, PenTool, DollarSign, ShieldCheck,
+  ChevronLeft, ChevronRight, LogOut, Building2,
+  LayoutGrid, Clock, CheckCircle2, SlidersHorizontal,
+} from 'lucide-react';
+import { useProjectStore } from '@/store/useProjectStore';
+import { cn } from '@/lib/utils';
+import { Role, StatusFilter } from '@/types';
+
+const NAV_ITEMS = [
+  { role: 'admin'    as Role, href: '/admin',    icon: ShieldCheck, label: 'Admin Overview',  active: 'text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20' },
+  { role: 'sales'    as Role, href: '/sales',    icon: TrendingUp,  label: 'Sales',            active: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
+  { role: 'survey'   as Role, href: '/survey',   icon: Map,         label: 'Survey',           active: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20' },
+  { role: 'mapping'  as Role, href: '/mapping',  icon: Layers,      label: 'Mapping',          active: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  { role: 'drafting' as Role, href: '/drafting', icon: PenTool,     label: 'Drafting',         active: 'text-pink-600 dark:text-pink-400 bg-pink-500/10 border-pink-500/20' },
+  { role: 'accounts' as Role, href: '/accounts', icon: DollarSign,  label: 'Accounts',         active: 'text-sky-600 dark:text-sky-400 bg-sky-500/10 border-sky-500/20' },
+];
+
+// ── Bypassed filter removed from all dept roles (admin sees all via nav) ──────
+const ROLE_FILTERS: Record<Role, { id: StatusFilter; label: string; icon: React.ElementType }[]> = {
+  admin: [],
+  sales: [
+    { id: 'all',         label: 'All Leads',  icon: LayoutGrid   },
+    { id: 'in_progress', label: 'Pending',    icon: Clock        },
+    { id: 'completed',   label: 'Confirmed',  icon: CheckCircle2 },
+  ],
+  survey: [
+    { id: 'all',         label: 'All Projects', icon: LayoutGrid   },
+    { id: 'in_progress', label: 'Pending',      icon: Clock        },
+    { id: 'completed',   label: 'Completed',    icon: CheckCircle2 },
+  ],
+  mapping: [
+    { id: 'all',         label: 'All Projects', icon: LayoutGrid   },
+    { id: 'in_progress', label: 'Pending',      icon: Clock        },
+    { id: 'completed',   label: 'Completed',    icon: CheckCircle2 },
+  ],
+  drafting: [
+    { id: 'all',         label: 'All Projects', icon: LayoutGrid   },
+    { id: 'in_progress', label: 'Pending',      icon: Clock        },
+    { id: 'completed',   label: 'Completed',    icon: CheckCircle2 },
+  ],
+  accounts: [
+    { id: 'all',         label: 'All Projects',   icon: LayoutGrid   },
+    { id: 'in_progress', label: 'Pending Invoice', icon: Clock        },
+    { id: 'completed',   label: 'Closed',          icon: CheckCircle2 },
+  ],
+};
+
+export function Sidebar() {
+  const [collapsed, setCollapsed] = useState(false);
+  const router   = useRouter();
+  const pathname = usePathname();
+  const { currentUser, logout, currentFilter, setCurrentFilter, getProjectsByDeptStatus } = useProjectStore();
+
+  const role  = currentUser?.role ?? 'admin';
+  const stage = role === 'admin' ? null : role as 'sales' | 'survey' | 'mapping' | 'drafting' | 'accounts';
+
+  const handleLogout = () => { logout(); router.push('/'); };
+
+  const visibleNavItems = role === 'admin' ? NAV_ITEMS : NAV_ITEMS.filter((item) => item.role === role);
+  const filters = ROLE_FILTERS[role] ?? [];
+
+  const counts = stage ? {
+    all:         getProjectsByDeptStatus(stage, 'all').filter((p) => p.stages[stage].status !== 'bypassed').length,
+    in_progress: getProjectsByDeptStatus(stage, 'in_progress').length,
+    completed:   getProjectsByDeptStatus(stage, 'completed').length,
+  } : {} as Record<string, number>;
+
+  return (
+    <motion.aside
+      animate={{ width: collapsed ? 64 : 256 }}
+      transition={{ type: 'spring', damping: 26, stiffness: 200 }}
+      className="relative h-screen flex flex-col glass border-r border-slate-200/50 dark:border-white/5 overflow-hidden z-20 flex-shrink-0"
+    >
+      {/* ── Logo + collapse toggle (both inside sidebar) ─────────────────── */}
+      <div className="flex items-center gap-2.5 px-3 py-3.5 border-b border-slate-200/50 dark:border-white/5">
+        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+          <Building2 className="w-5 h-5 text-white" />
+        </div>
+        <AnimatePresence>
+          {!collapsed && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="min-w-0">
+              <p className="font-display font-bold text-slate-900 dark:text-white text-[17px] leading-none truncate">CivilTech</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Workflow Platform</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* ─ Collapse button — always visible, fully inside sidebar ─ */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className={cn(
+            'flex-shrink-0 p-1.5 rounded-lg transition-colors',
+            'bg-slate-100 dark:bg-white/8 border border-slate-200 dark:border-white/10',
+            'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
+            'hover:bg-slate-200 dark:hover:bg-white/15',
+            collapsed ? 'ml-auto' : 'ml-auto'
+          )}
+        >
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </motion.button>
+      </div>
+
+      {/* ── Navigation ────────────────────────────────────────────────────── */}
+      <nav className="px-2 py-2.5 space-y-0.5">
+        <AnimatePresence>
+          {!collapsed && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="px-3 mb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              Navigation
+            </motion.p>
+          )}
+        </AnimatePresence>
+        {visibleNavItems.map((item) => {
+          const isActive = pathname.includes(item.href);
+          const Icon = item.icon;
+          return (
+            <Link key={item.href} href={item.href}>
+              <motion.div whileHover={{ x: collapsed ? 0 : 2 }}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 border',
+                  collapsed && 'justify-center px-2',
+                  isActive
+                    ? item.active
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 border-transparent'
+                )}>
+                <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+                <AnimatePresence>
+                  {!collapsed && (
+                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm font-medium truncate">
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* ── Status Filters (non-admin, no Bypassed option) ───────────────── */}
+      {filters.length > 0 && (
+        <div className="px-2 py-2.5 border-t border-slate-200/50 dark:border-white/5 space-y-0.5">
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 px-3 mb-1.5">
+                <SlidersHorizontal className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Filter</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {filters.map((f) => {
+            const isActive = currentFilter === f.id;
+            const Icon = f.icon;
+            const count = counts[f.id] ?? 0;
+            return (
+              <motion.button key={f.id} whileHover={{ x: collapsed ? 0 : 2 }}
+                onClick={() => setCurrentFilter(f.id)}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-150 text-left',
+                  collapsed && 'justify-center px-2',
+                  isActive
+                    ? 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5'
+                )}>
+                <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+                <AnimatePresence>
+                  {!collapsed && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center justify-between flex-1 min-w-0">
+                      <span className="text-sm font-medium truncate">{f.label}</span>
+                      <span className={cn(
+                        'text-[11px] font-semibold px-1.5 py-0.5 rounded-full tabular-nums min-w-[20px] text-center',
+                        isActive ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400' : 'bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-slate-500'
+                      )}>{count}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex-1" />
+
+      {/* ── User + logout ─────────────────────────────────────────────────── */}
+      <div className="px-2 py-3 border-t border-slate-200/50 dark:border-white/5 space-y-1">
+        {currentUser && !collapsed && (
+          <div className="flex items-center gap-3 px-3 py-2 mb-1">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+              {currentUser.name.charAt(0)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate leading-none">{currentUser.name}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 capitalize mt-0.5">{currentUser.role}</p>
+            </div>
+          </div>
+        )}
+        <motion.button whileTap={{ scale: 0.97 }} onClick={handleLogout}
+          className={cn(
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 border border-transparent',
+            'text-slate-400 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400',
+            'hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/20',
+            collapsed && 'justify-center px-2'
+          )}>
+          <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm font-medium">Sign Out</motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      </div>
+    </motion.aside>
+  );
+}

@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/* Tailwind v4 class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    /* ── Light mode CSS variables ───────────────────────────── */
+    --glass-bg:      rgba(255, 255, 255, 0.88);
+    --glass-border:  rgba(148, 163, 184, 0.22);
+    --glass-shadow:  0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.07);
+    --blob-1:        rgba(59, 130, 246, 0.055);
+    --blob-2:        rgba(139, 92, 246, 0.04);
+    --body-bg:       #ffffff;
+  }
+
+  html.dark {
+    /* ── Dark mode CSS variables ────────────────────────────── */
+    --glass-bg:      rgba(15, 23, 42, 0.65);
+    --glass-border:  rgba(148, 163, 184, 0.08);
+    --glass-shadow:  0 4px 30px rgba(0, 0, 0, 0.35);
+    --blob-1:        rgba(59, 130, 246, 0.07);
+    --blob-2:        rgba(139, 92, 246, 0.07);
+    --body-bg:       #080d1a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    @apply text-slate-900 dark:text-slate-100 font-sans;
+    background-color: var(--body-bg);
+    background-image:
+      radial-gradient(ellipse at 15% 30%, var(--blob-1) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 70%, var(--blob-2) 0%, transparent 50%);
+    min-height: 100vh;
+    /* Subtle grid only in light mode — hidden in dark */
+    background-size: 100% 100%, 100% 100%;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { @apply bg-slate-100 dark:bg-slate-900; }
+  ::-webkit-scrollbar-thumb  { @apply bg-slate-300 dark:bg-slate-700 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400 dark:bg-slate-600; }
+}
+
+@layer utilities {
+  /* CSS-variable-driven glass — adapts to light/dark automatically */
+  .glass {
+    background:            var(--glass-bg);
+    backdrop-filter:       blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border:                1px solid var(--glass-border);
+    box-shadow:            var(--glass-shadow);
+  }
+
+  .glass-hover {
+    background:            var(--glass-bg);
+    backdrop-filter:       blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border:                1px solid var(--glass-border);
+    transition: all 0.25s ease;
+  }
+  .glass-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10);
+    border-color: rgba(99, 102, 241, 0.25);
+  }
+  html.dark .glass-hover:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    border-color: rgba(99, 102, 241, 0.2);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Shimmer skeleton */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0)   0%,
+      rgba(255,255,255,0.06) 50%,
+      rgba(255,255,255,0)   100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  /* Input focus ring shared style */
+  .input-base {
+    @apply w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all duration-200;
+    @apply bg-slate-100 dark:bg-slate-800/60;
+    @apply border border-slate-200 dark:border-white/10;
+    @apply text-slate-900 dark:text-white;
+    @apply placeholder-slate-400 dark:placeholder-slate-500;
+  }
+  .input-base:focus {
+    @apply ring-2 ring-blue-500/30 border-blue-400 dark:border-blue-500/60;
+  }
+
+  .glow-blue    { box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
+  .glow-purple  { box-shadow: 0 0 30px rgba(139, 92, 246, 0.2); }
+  .glow-emerald { box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); }
+}
