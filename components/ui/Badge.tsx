@@ -18,11 +18,13 @@ interface PriorityBadgeProps extends BadgeProps {
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const dots: Record<StageStatus, string> = {
-    pending: 'bg-amber-400',
-    in_progress: 'bg-blue-400 animate-pulse',
-    completed: 'bg-emerald-400',
-    bypassed: 'bg-slate-500',
-    waiting: 'bg-purple-400',
+    pending:                'bg-amber-400',
+    in_progress:            'bg-blue-400 animate-pulse',
+    completed:              'bg-emerald-400',
+    bypassed:               'bg-slate-500',
+    waiting:                'bg-purple-400',
+    cancelled:              'bg-red-500',
+    cancellation_requested: 'bg-orange-400 animate-pulse',
   };
 
   return (
@@ -68,12 +70,13 @@ export function RoleBadge({
   className?: string;
 }) {
   const roleColors: Record<string, string> = {
-    admin: 'bg-violet-500/20 text-violet-400 border-violet-500/30',
-    sales: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    survey: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    mapping: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    drafting: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-    accounts: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+    admin:         'bg-violet-500/20 text-violet-400 border-violet-500/30',
+    sales:         'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    survey:        'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    mapping:       'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    drawing:       'bg-pink-500/20 text-pink-400 border-pink-500/30',
+    visualization: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+    accounts:      'bg-sky-500/20 text-sky-400 border-sky-500/30',
   };
 
   return (

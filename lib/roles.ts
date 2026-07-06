@@ -46,14 +46,23 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
     icon: 'Layers',
     stage: 'mapping',
   },
-  drafting: {
-    role: 'drafting',
-    label: 'Drafting',
+  drawing: {
+    role: 'drawing',
+    label: 'Drawing',
     description: 'Create technical drawings and CAD plans',
     color: 'text-pink-400',
     gradient: 'from-pink-600 to-rose-600',
     icon: 'PenTool',
-    stage: 'drafting',
+    stage: 'drawing',
+  },
+  visualization: {
+    role: 'visualization',
+    label: '3D Visualization',
+    description: 'Produce 3D models and visual renderings',
+    color: 'text-indigo-400',
+    gradient: 'from-indigo-600 to-blue-700',
+    icon: 'Box',
+    stage: 'visualization',
   },
   accounts: {
     role: 'accounts',
@@ -70,23 +79,26 @@ export const PIPELINE_STAGES: PipelineStage[] = [
   'sales',
   'survey',
   'mapping',
-  'drafting',
+  'drawing',
+  'visualization',
   'accounts',
 ];
 
 export const STAGE_LABELS: Record<PipelineStage, string> = {
-  sales: 'Sales',
-  survey: 'Survey',
-  mapping: 'Mapping',
-  drafting: 'Drafting',
-  accounts: 'Accounts',
+  sales:         'Sales',
+  survey:        'Survey',
+  mapping:       'Mapping',
+  drawing:       'Drawing',
+  visualization: '3D Visualization',
+  accounts:      'Accounts',
 };
 
 export const USER_NAMES: Record<Role, string> = {
-  admin: 'Arjun Mehta',
-  sales: 'Priya Sharma',
-  survey: 'Ravi Kumar',
-  mapping: 'Sneha Patel',
-  drafting: 'Anil Desai',
-  accounts: 'Kavitha Nair',
+  admin:         'Arjun Mehta',
+  sales:         'Priya Sharma',
+  survey:        'Ravi Kumar',
+  mapping:       'Sneha Patel',
+  drawing:       'Anil Desai',
+  visualization: 'Meena Krishnan',
+  accounts:      'Kavitha Nair',
 };

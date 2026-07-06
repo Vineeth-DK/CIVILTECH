@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
   Building2,
   Eye,
@@ -101,17 +102,11 @@ export default function LoginPage() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="relative w-full max-w-md"
       >
-        {/* Logo + title */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 shadow-xl shadow-blue-500/25 mb-5">
-            <Building2 className="w-7 h-7 text-white" />
+        {/* Logo */}
+        <div className="text-center mb-10 mt-4">
+          <div className="relative w-full h-32 max-w-[400px] mx-auto dark:bg-white/95 dark:backdrop-blur-md rounded-2xl dark:shadow-xl dark:shadow-white/5 transition-all duration-300">
+            <Image src="/logo.png" alt="CivilTech Logo" fill className="object-contain p-0 dark:p-3" priority />
           </div>
-          <h1 className="font-display font-bold text-3xl text-slate-900 dark:text-white tracking-tight">
-            Civil<span className="gradient-text">Tech</span>
-          </h1>
-          <p className="text-slate-400 dark:text-slate-500 text-sm mt-1.5">
-            Engineering Workflow Platform
-          </p>
         </div>
 
         {/* Login form card */}

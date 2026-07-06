@@ -1,102 +1,94 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { Project, LeadDetails } from '@/types';
+import { Project, LeadDetails, PipelineStage } from '@/types';
 import { useProjectStore } from '@/store/useProjectStore';
-import { CheckCircle, GitBranch, AlertTriangle, Phone, MapPin, User, Navigation } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import {
+  CheckCircle, GitBranch, Navigation, Phone, AlertTriangle,
+  XCircle, CalendarClock, RotateCcw, Send, ArrowRightLeft,
+} from 'lucide-react';
+import { cn, formatDate } from '@/lib/utils';
 
-// ─── Sales Action Modal ───────────────────────────────────────────────────────
+const PIPELINE_STAGES: { value: PipelineStage; label: string }[] = [
+  { value: 'sales',         label: 'Sales' },
+  { value: 'survey',        label: 'Survey' },
+  { value: 'mapping',       label: 'Mapping' },
+  { value: 'drawing',       label: 'Drawing' },
+  { value: 'visualization', label: '3D Visualization' },
+  { value: 'accounts',      label: 'Accounts' },
+];
 
-interface SalesActionModalProps {
-  project: Project | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
+const SELECT_CLS = [
+  'w-full h-10 pl-3 pr-4 rounded-xl border text-sm appearance-none',
+  'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100',
+  'border-slate-200 dark:border-white/10',
+  'focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all',
+].join(' ');
 
-export function SalesActionModal({ project, isOpen, onClose }: SalesActionModalProps) {
-  const [surveyRequired, setSurveyRequired] = useState<boolean | null>(null);
-  const [clientPhone, setClientPhone] = useState('');
-  const [mapsLink, setMapsLink] = useState('');
+// ─── Sales Action Modal ────────────────────────────────────────────────────────
+
+export function SalesActionModal({ project, isOpen, onClose }: {
+  project: Project | null; isOpen: boolean; onClose: () => void;
+}) {
+  const [clientPhone, setClientPhone] = useState(project?.clientPhone ?? '');
   const [isLoading, setIsLoading] = useState(false);
   const { confirmLead } = useProjectStore();
 
-  const isValid = surveyRequired !== null && clientPhone.trim().length >= 10;
+  const wfLabel: Record<string, string> = {
+    marking:       '📍 Marking — Survey + Mapping simultaneously → Accounts',
+    mapping:       '🗺️ Mapping — Survey → Mapping → Accounts',
+    drawing:       '✏️ Drawing → Accounts',
+    visualization: '🏗️ 3D Visualization → Accounts',
+  };
 
   const handleConfirm = async () => {
-    if (!project || !isValid) return;
+    if (!project || clientPhone.trim().length < 10) return;
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    confirmLead(project.id, surveyRequired!, { clientPhone: clientPhone.trim(), mapsLink: mapsLink.trim() } as LeadDetails);
+    confirmLead(project.id, { clientPhone: clientPhone.trim() } as LeadDetails);
     setIsLoading(false);
     handleClose();
   };
 
-  const handleClose = () => { onClose(); setSurveyRequired(null); setClientPhone(''); setMapsLink(''); };
+  const handleClose = () => { onClose(); setClientPhone(''); };
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Confirm Lead" description={project?.name ?? ''}>
       <div className="space-y-4">
-        <div className="space-y-3 p-3 rounded-xl bg-slate-50 dark:bg-white/4 border border-slate-200 dark:border-white/8">
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-            <User className="w-3.5 h-3.5" /> Client Contact Details
-          </p>
-          <div className="space-y-1.5">
-            <label className="text-xs text-slate-500 dark:text-slate-400">Mobile Number <span className="text-red-400">*</span></label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+91 98765 43210" className="input-base pl-9" />
+        {project && (
+          <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+            <div className="flex items-center gap-1.5 mb-1">
+              <GitBranch className="w-3.5 h-3.5 text-blue-500" />
+              <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Workflow</p>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-slate-500 dark:text-slate-400">Google Maps Link</label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <input type="url" value={mapsLink} onChange={(e) => setMapsLink(e.target.value)} placeholder="https://maps.google.com/…" className="input-base pl-9" />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2.5 flex items-center gap-1.5">
-            <GitBranch className="w-3.5 h-3.5 text-blue-500" /> Is a Survey Required?
-          </p>
-          <div className="grid grid-cols-2 gap-2.5">
-            <ToggleOption selected={surveyRequired === true}  onClick={() => setSurveyRequired(true)}  label="Yes — Survey"   sublabel="Route to Survey"  color="amber" />
-            <ToggleOption selected={surveyRequired === false} onClick={() => setSurveyRequired(false)} label="No — Skip"      sublabel="Route to Mapping" color="slate" />
-          </div>
-        </div>
-
-        {surveyRequired === false && (
-          <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700 dark:text-amber-300">Survey will be <strong>Bypassed</strong>. Project goes to Mapping.</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400">{wfLabel[project.workflowType]}</p>
+            {project.scheduledDate && <p className="text-xs text-blue-500 mt-1">📅 Scheduled: {formatDate(project.scheduledDate)}</p>}
+            {project.deadline && <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⏰ Deadline: {formatDate(project.deadline)}</p>}
           </div>
         )}
-
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Client Mobile <span className="text-red-400">*</span></label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+91 98765 43210" className="input-base pl-9" />
+          </div>
+        </div>
         <div className="flex gap-3 pt-1">
           <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" size="md" className="flex-1" disabled={!isValid} isLoading={isLoading} icon={<CheckCircle className="w-4 h-4" />} onClick={handleConfirm}>
-            Confirm Lead
-          </Button>
+          <Button variant="primary" size="md" className="flex-1" disabled={clientPhone.trim().length < 10} isLoading={isLoading} icon={<CheckCircle className="w-4 h-4" />} onClick={handleConfirm}>Confirm Lead</Button>
         </div>
       </div>
     </Modal>
   );
 }
 
-// ─── Survey — Step 1: Mark Reached Location ───────────────────────────────────
+// ─── Survey: Step 1 — Mark Reached ────────────────────────────────────────────
 
-interface ReachedLocationModalProps {
-  project: Project | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function ReachedLocationModal({ project, isOpen, onClose }: ReachedLocationModalProps) {
+export function ReachedLocationModal({ project, isOpen, onClose }: {
+  project: Project | null; isOpen: boolean; onClose: () => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const { markReachedLocation } = useProjectStore();
 
@@ -109,6 +101,9 @@ export function ReachedLocationModal({ project, isOpen, onClose }: ReachedLocati
     onClose();
   };
 
+  const location = project?.location ?? '';
+  const isMapLink = location.startsWith('http');
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Confirm Site Arrival" description={project?.name ?? ''}>
       <div className="space-y-4">
@@ -117,50 +112,45 @@ export function ReachedLocationModal({ project, isOpen, onClose }: ReachedLocati
             <Navigation className="w-4 h-4 text-emerald-500" />
             <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Step 1 of 2 — Site Arrival</p>
           </div>
-          <p className="text-xs text-emerald-600 dark:text-emerald-400">
-            Confirm that the field team has reached the project site. After this, you'll be able to mark the survey as complete.
-          </p>
+          <p className="text-xs text-emerald-600 dark:text-emerald-400">Confirm field team has reached the project site.</p>
         </div>
-
-        {project?.mapsLink && (
-          <a href={project.mapsLink} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 hover:underline">
-            <MapPin className="w-3.5 h-3.5" /> View project location on Google Maps
+        {project?.scheduledDate && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
+            <CalendarClock className="w-3.5 h-3.5 flex-shrink-0" /> Scheduled: {formatDate(project.scheduledDate)}
+          </div>
+        )}
+        {isMapLink && (
+          <a href={location} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 hover:underline">
+            <Navigation className="w-3.5 h-3.5" /> View on Maps
           </a>
         )}
-
         <div className="flex gap-3">
           <Button variant="secondary" size="md" className="flex-1" onClick={onClose}>Cancel</Button>
-          <Button variant="success" size="md" className="flex-1" isLoading={isLoading} icon={<Navigation className="w-4 h-4" />} onClick={handleConfirm}>
-            Confirm Reached
-          </Button>
+          <Button variant="success" size="md" className="flex-1" isLoading={isLoading} icon={<Navigation className="w-4 h-4" />} onClick={handleConfirm}>Confirm Reached</Button>
         </div>
       </div>
     </Modal>
   );
 }
 
-// ─── Survey — Step 2: Complete Survey ─────────────────────────────────────────
+// ─── Survey: Step 2 — Complete ────────────────────────────────────────────────
 
-interface SurveyActionModalProps {
-  project: Project | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function SurveyActionModal({ project, isOpen, onClose }: SurveyActionModalProps) {
-  const [mappingRequired, setMappingRequired] = useState<boolean | null>(null);
+export function SurveyActionModal({ project, isOpen, onClose }: {
+  project: Project | null; isOpen: boolean; onClose: () => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const { completeSurvey } = useProjectStore();
 
+  const wf = project?.workflowType;
+  const nextLabel = wf === 'marking' ? 'waits for Mapping, then → Accounts' : 'routes to Mapping';
+
   const handleConfirm = async () => {
-    if (!project || mappingRequired === null) return;
+    if (!project) return;
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    completeSurvey(project.id, mappingRequired);
+    completeSurvey(project.id);
     setIsLoading(false);
     onClose();
-    setMappingRequired(null);
   };
 
   return (
@@ -168,54 +158,26 @@ export function SurveyActionModal({ project, isOpen, onClose }: SurveyActionModa
       <div className="space-y-4">
         <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
           <p className="text-xs font-semibold text-amber-600 dark:text-amber-300 mb-0.5">Step 2 of 2 — Mark Complete</p>
-          <p className="text-xs text-amber-700 dark:text-amber-400">Survey is complete. Select the next stage.</p>
+          <p className="text-xs text-amber-700 dark:text-amber-400">Survey complete. Project {nextLabel}.</p>
         </div>
-
-        <div>
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2.5 flex items-center gap-1.5">
-            <GitBranch className="w-3.5 h-3.5 text-amber-500" /> Is Mapping Required?
-          </p>
-          <div className="grid grid-cols-2 gap-2.5">
-            <ToggleOption selected={mappingRequired === true}  onClick={() => setMappingRequired(true)}  label="Yes — Mapping" sublabel="Route to Mapping"      color="emerald" />
-            <ToggleOption selected={mappingRequired === false} onClick={() => setMappingRequired(false)} label="No — Skip"     sublabel="Bypass to Accounts"    color="slate"   />
-          </div>
-        </div>
-
-        {mappingRequired === false && (
-          <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-700 dark:text-amber-300">
-              <strong>Mapping</strong> &amp; <strong>Drafting</strong> will be Bypassed. Goes to Accounts.
-            </p>
-          </div>
-        )}
-
         <div className="flex gap-3 pt-1">
           <Button variant="secondary" size="md" className="flex-1" onClick={onClose}>Cancel</Button>
-          <Button variant="success" size="md" className="flex-1" disabled={mappingRequired === null} isLoading={isLoading} icon={<CheckCircle className="w-4 h-4" />} onClick={handleConfirm}>
-            Complete Survey
-          </Button>
+          <Button variant="success" size="md" className="flex-1" isLoading={isLoading} icon={<CheckCircle className="w-4 h-4" />} onClick={handleConfirm}>Complete Survey</Button>
         </div>
       </div>
     </Modal>
   );
 }
 
-// ─── Generic Confirm Modal ─────────────────────────────────────────────────────
+// ─── Generic Confirm Modal ────────────────────────────────────────────────────
 
-interface GenericActionModalProps {
-  project: Project | null;
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  description: string;
-  actionLabel: string;
+export function GenericActionModal({ project, isOpen, onClose, title, description, actionLabel, onConfirm, variant = 'primary', accentColor = 'blue' }: {
+  project: Project | null; isOpen: boolean; onClose: () => void;
+  title: string; description: string; actionLabel: string;
   onConfirm: (projectId: string) => void;
   variant?: 'primary' | 'success' | 'danger';
-  accentColor?: 'blue' | 'emerald' | 'pink' | 'sky';
-}
-
-export function GenericActionModal({ project, isOpen, onClose, title, description, actionLabel, onConfirm, variant = 'primary', accentColor = 'blue' }: GenericActionModalProps) {
+  accentColor?: 'blue' | 'emerald' | 'pink' | 'sky' | 'indigo';
+}) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
@@ -228,10 +190,11 @@ export function GenericActionModal({ project, isOpen, onClose, title, descriptio
   };
 
   const colorMap: Record<string, string> = {
-    blue:    'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300',
-    emerald: 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300',
-    pink:    'bg-pink-50 dark:bg-pink-500/10 border-pink-200 dark:border-pink-500/20 text-pink-700 dark:text-pink-300',
-    sky:     'bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/20 text-sky-700 dark:text-sky-300',
+    blue:   'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300',
+    emerald:'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300',
+    pink:   'bg-pink-50 dark:bg-pink-500/10 border-pink-200 dark:border-pink-500/20 text-pink-700 dark:text-pink-300',
+    sky:    'bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/20 text-sky-700 dark:text-sky-300',
+    indigo: 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300',
   };
 
   return (
@@ -247,23 +210,194 @@ export function GenericActionModal({ project, isOpen, onClose, title, descriptio
   );
 }
 
-// ─── Shared Toggle Option ─────────────────────────────────────────────────────
+// ─── Cancel Modal — worker submits request, admin reviews it ──────────────────
 
-function ToggleOption({ selected, onClick, label, sublabel, color }: {
-  selected: boolean; onClick: () => void; label: string; sublabel: string; color: string;
+export function CancelModal({ project, stage, isOpen, onClose }: {
+  project: Project | null; stage: PipelineStage; isOpen: boolean; onClose: () => void;
 }) {
-  const sel: Record<string, string> = {
-    amber:   'border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-500/10',
-    emerald: 'border-emerald-400 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10',
-    slate:   'border-slate-400 dark:border-slate-500 bg-slate-50 dark:bg-slate-700/20',
+  const [reason, setReason]       = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { requestCancellation } = useProjectStore();
+
+  const handleConfirm = async () => {
+    if (!project || reason.trim().length < 10) return;
+    setIsLoading(true);
+    await new Promise((r) => setTimeout(r, 500));
+    requestCancellation(project.id, stage, reason.trim());
+    setIsLoading(false);
+    handleClose();
   };
+
+  const handleClose = () => { onClose(); setReason(''); };
+
   return (
-    <button onClick={onClick} className={cn(
-      'p-2.5 rounded-xl border text-left transition-all duration-150',
-      selected ? sel[color] ?? 'border-blue-400 bg-blue-50' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/4 hover:bg-slate-50 dark:hover:bg-white/8'
-    )}>
-      <p className={cn('text-xs font-semibold', selected ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-300')}>{label}</p>
-      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{sublabel}</p>
-    </button>
+    <Modal isOpen={isOpen} onClose={handleClose} title="Request Cancellation" description={project?.name ?? ''}>
+      <div className="space-y-4">
+        <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 text-xs text-orange-700 dark:text-orange-300 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <p>Your cancellation request will be sent to <strong>Admin</strong> for review. They can approve it or reassign the project to a different department.</p>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+            Reason for Cancellation <span className="text-red-400">*</span>
+          </label>
+          <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3}
+            placeholder="Please describe why this task needs to be cancelled or postponed (min 10 chars)…"
+            className="w-full px-3 py-2.5 rounded-xl border text-sm bg-white dark:bg-white/5 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-orange-400/40 resize-none transition-all" />
+          <p className="text-[11px] text-slate-400 dark:text-slate-500">{reason.trim().length}/10 min characters</p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Go Back</Button>
+          <Button variant="danger" size="md" className="flex-1" disabled={reason.trim().length < 10} isLoading={isLoading}
+            icon={<Send className="w-4 h-4" />} onClick={handleConfirm}>
+            Submit Request
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── Admin Cancel Review Modal — approve or reassign ─────────────────────────
+
+export function AdminCancelReviewModal({ project, stage, isOpen, onClose }: {
+  project: Project | null; stage: PipelineStage; isOpen: boolean; onClose: () => void;
+}) {
+  const [mode, setMode]           = useState<'approve' | 'reassign'>('approve');
+  const [toStage, setToStage]     = useState<PipelineStage>('sales');
+  const [newDate, setNewDate]     = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { approveCancellation, reassignProject } = useProjectStore();
+
+  const stageRecord = project?.stages[stage];
+  const isFieldTarget = toStage === 'survey' || toStage === 'mapping';
+
+  const handleSubmit = async () => {
+    if (!project) return;
+    setIsLoading(true);
+    await new Promise((r) => setTimeout(r, 600));
+    if (mode === 'approve') {
+      approveCancellation(project.id, stage);
+    } else {
+      reassignProject(project.id, stage, toStage, newDate || undefined);
+    }
+    setIsLoading(false);
+    handleClose();
+  };
+
+  const handleClose = () => { onClose(); setMode('approve'); setToStage('sales'); setNewDate(''); };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} title="Review Cancellation Request" description={project?.name ?? ''}>
+      <div className="space-y-4">
+        {/* Reason */}
+        {stageRecord?.cancelReason && (
+          <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20">
+            <p className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider mb-1">Worker's Reason</p>
+            <p className="text-xs text-orange-700 dark:text-orange-300 leading-relaxed">{stageRecord.cancelReason}</p>
+          </div>
+        )}
+
+        {/* Mode toggle */}
+        <div>
+          <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">Admin Decision</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => setMode('approve')} className={cn(
+              'p-2.5 rounded-xl border text-left transition-all',
+              mode === 'approve' ? 'border-red-400 bg-red-50 dark:bg-red-500/10' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/4 hover:bg-slate-50 dark:hover:bg-white/8'
+            )}>
+              <p className={cn('text-xs font-semibold', mode === 'approve' ? 'text-red-600 dark:text-red-300' : 'text-slate-600 dark:text-slate-300')}>✅ Approve Cancellation</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Mark as cancelled</p>
+            </button>
+            <button onClick={() => setMode('reassign')} className={cn(
+              'p-2.5 rounded-xl border text-left transition-all',
+              mode === 'reassign' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/4 hover:bg-slate-50 dark:hover:bg-white/8'
+            )}>
+              <p className={cn('text-xs font-semibold', mode === 'reassign' ? 'text-blue-600 dark:text-blue-300' : 'text-slate-600 dark:text-slate-300')}>🔀 Reassign to Dept</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Route to another team</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Reassign options */}
+        {mode === 'reassign' && (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Assign To Department</label>
+              <select value={toStage} onChange={(e) => setToStage(e.target.value as PipelineStage)} className={SELECT_CLS}>
+                {PIPELINE_STAGES.filter((s) => s.value !== stage).map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+            {isFieldTarget && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">New Scheduled Date</label>
+                <input type="datetime-local" value={newDate} onChange={(e) => setNewDate(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Cancel</Button>
+          <Button variant={mode === 'approve' ? 'danger' : 'primary'} size="md" className="flex-1" isLoading={isLoading}
+            icon={mode === 'approve' ? <XCircle className="w-4 h-4" /> : <ArrowRightLeft className="w-4 h-4" />}
+            onClick={handleSubmit}>
+            {mode === 'approve' ? 'Approve Cancellation' : 'Reassign Project'}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── Reschedule Modal ─────────────────────────────────────────────────────────
+
+export function RescheduleModal({ project, stage, isOpen, onClose }: {
+  project: Project | null; stage: PipelineStage; isOpen: boolean; onClose: () => void;
+}) {
+  const [newDate, setNewDate]     = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { rescheduleStage } = useProjectStore();
+  const isFieldStage = stage === 'survey' || stage === 'mapping';
+
+  const handleConfirm = async () => {
+    if (!project) return;
+    setIsLoading(true);
+    await new Promise((r) => setTimeout(r, 500));
+    rescheduleStage(project.id, stage, newDate || undefined);
+    setIsLoading(false);
+    handleClose();
+  };
+
+  const handleClose = () => { onClose(); setNewDate(''); };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} title="Reschedule Project" description={project?.name ?? ''}>
+      <div className="space-y-4">
+        {project?.stages[stage].cancelReason && (
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/4 border border-slate-200 dark:border-white/8 text-xs text-slate-600 dark:text-slate-400">
+            <p className="font-semibold mb-0.5">Previous reason:</p>
+            <p>{project.stages[stage].cancelReason}</p>
+          </div>
+        )}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+            {isFieldStage ? 'New Scheduled Field-Visit Date' : 'New Deadline'}
+          </label>
+          <div className="relative">
+            <CalendarClock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
+            <input type={isFieldStage ? 'datetime-local' : 'date'} value={newDate} onChange={(e) => setNewDate(e.target.value)}
+              className="w-full h-10 pl-9 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Cancel</Button>
+          <Button variant="primary" size="md" className="flex-1" isLoading={isLoading} icon={<RotateCcw className="w-4 h-4" />} onClick={handleConfirm}>Reschedule</Button>
+        </div>
+      </div>
+    </Modal>
   );
 }

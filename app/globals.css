@@ -112,3 +112,32 @@
   .glow-purple  { box-shadow: 0 0 30px rgba(139, 92, 246, 0.2); }
   .glow-emerald { box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); }
 }
+
+/* ── Native <select> dropdown dark mode fix ─────────────────────────────────
+   Browsers render the dropdown list in the OS native popup, which doesn't
+   inherit CSS colours. We force explicit bg/text on the element itself so at
+   least the closed select control looks correct; the Tailwind classes on each
+   <select> handle the rest.                                                   */
+html.dark select {
+  color-scheme: dark;
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+html.dark select option {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Light mode selects — ensure they don't accidentally inherit dark bg */
+html:not(.dark) select {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html:not(.dark) select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+

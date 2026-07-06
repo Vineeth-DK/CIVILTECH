@@ -1,49 +1,51 @@
-export type Role = 'admin' | 'sales' | 'survey' | 'mapping' | 'drafting' | 'accounts';
+export type Role = 'admin' | 'sales' | 'survey' | 'mapping' | 'drawing' | 'visualization' | 'accounts';
 
-export type StageStatus = 'pending' | 'in_progress' | 'completed' | 'bypassed' | 'waiting';
+export type StageStatus = 'pending' | 'in_progress' | 'completed' | 'bypassed' | 'cancelled' | 'waiting' | 'cancellation_requested';
 
-export type StatusFilter = 'all' | 'in_progress' | 'completed' | 'bypassed';
+export type StatusFilter = 'all' | 'in_progress' | 'completed' | 'bypassed' | 'cancelled';
 
 export type DateFilter = 'all' | 'today' | 'week' | 'month' | 'year';
 
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
 
-export type ProjectType =
-  | 'Road Construction'
-  | 'Bridge Engineering'
-  | 'Drainage System'
-  | 'Structural Audit'
-  | 'Land Survey'
-  | 'Residential Layout'
-  | 'Commercial Development'
-  | 'Water Treatment'
-  | 'Highway Expansion'
-  | 'Flyover Design';
+export type ProjectType = string; // Allows predefined types + custom "Other" entries
 
-export type PipelineStage = 'sales' | 'survey' | 'mapping' | 'drafting' | 'accounts';
+export type PipelineStage = 'sales' | 'survey' | 'mapping' | 'drawing' | 'visualization' | 'accounts';
+
+/**
+ * Determines the entire workflow pipeline for a project.
+ * - marking:       Sales → Survey + Mapping (simultaneous) → Accounts
+ * - mapping:       Sales → Survey → Mapping → Accounts
+ * - drawing:       Sales → Drawing → Accounts
+ * - visualization: Sales → 3D Visualization → Accounts
+ */
+export type WorkflowType = 'marking' | 'mapping' | 'drawing' | 'visualization';
 
 export interface StageRecord {
   status: StageStatus;
   completedAt?: string;
-  reachedAt?: string;   // Survey: timestamp when field team reached site
+  reachedAt?: string;       // Survey: when field team confirmed site arrival
+  scheduledDate?: string;   // Survey / Mapping: specific field-visit date (not a deadline)
   notes?: string;
   assignedTo?: string;
+  cancelReason?: string;    // Required if status === 'cancelled'
 }
 
 export interface LeadDetails {
   clientPhone: string;
-  mapsLink: string;
 }
 
-/** Fields required when creating a new lead (from Add Lead form) */
+/** Fields required when creating a new lead */
 export interface NewLead {
   name: string;
   client: string;
   clientPhone: string;
   location: string;
-  mapsLink?: string;
-  type: ProjectType;
-  deadline?: string;
+  type: string;
+  workflowType: WorkflowType;  // determines pipeline
+  value?: number;              // project amount — visible to admin/sales/accounts only
+  scheduledDate?: string;      // for marking/mapping workflows (field visit date)
+  deadline?: string;           // for drawing/visualization workflows
   description?: string;
 }
 
@@ -51,25 +53,27 @@ export interface Project {
   id: string;
   name: string;
   client: string;
+  clientPhone?: string;
   location: string;
-  type: ProjectType;
+  type: string;
+  workflowType: WorkflowType;
   priority: Priority;
-  value: number;          // in lakhs INR — visible to admin only
+  value: number;              // admin/sales/accounts only
   currentStage: PipelineStage;
   createdAt: string;
   updatedAt: string;
-  deadline?: string;      // ISO date string
+  scheduledDate?: string;     // survey/mapping field-visit date
+  deadline?: string;          // drawing/viz/accounts deadline
   stages: {
-    sales: StageRecord;
-    survey: StageRecord;
-    mapping: StageRecord;
-    drafting: StageRecord;
-    accounts: StageRecord;
+    sales:         StageRecord;
+    survey:        StageRecord;
+    mapping:       StageRecord;
+    drawing:       StageRecord;
+    visualization: StageRecord;
+    accounts:      StageRecord;
   };
   description: string;
   area?: number;
-  // Lead details added by Sales on confirmation
-  clientPhone?: string;
   mapsLink?: string;
 }
 
@@ -79,12 +83,10 @@ export interface User {
 }
 
 export interface ProjectStore {
-  // Data
   projects: Project[];
   currentUser: User | null;
   isDarkMode: boolean;
 
-  // Filter state (sidebar + topbar)
   currentFilter: StatusFilter;
   searchQuery: string;
   dateFilter: DateFilter;
@@ -103,12 +105,22 @@ export interface ProjectStore {
   addLead: (lead: NewLead) => void;
 
   // Pipeline actions
-  confirmLead: (projectId: string, surveyRequired: boolean, details: LeadDetails) => void;
+  confirmLead: (projectId: string, details: LeadDetails) => void;
   markReachedLocation: (projectId: string) => void;
-  completeSurvey: (projectId: string, mappingRequired: boolean) => void;
+
+  // Survey completions (workflow-aware)
+  completeSurvey: (projectId: string) => void;
   completeMapping: (projectId: string) => void;
-  completeDrafting: (projectId: string) => void;
+  completeDrawing: (projectId: string) => void;
+  completeVisualization: (projectId: string) => void;
   completeAccounts: (projectId: string) => void;
+
+  // Cancel / reschedule
+  requestCancellation: (projectId: string, stage: PipelineStage, reason: string) => void;
+  approveCancellation: (projectId: string, stage: PipelineStage) => void;
+  reassignProject: (projectId: string, fromStage: PipelineStage, toStage: PipelineStage, newDate?: string) => void;
+  cancelStage: (projectId: string, stage: PipelineStage, reason: string) => void;
+  rescheduleStage: (projectId: string, stage: PipelineStage, newDate?: string) => void;
 
   // Selectors
   getProjectsByStage: (stage: PipelineStage) => Project[];

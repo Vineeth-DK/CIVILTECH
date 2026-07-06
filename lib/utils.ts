@@ -15,33 +15,33 @@ export function formatDate(dateString: string): string {
   });
 }
 
-export function formatCurrency(value: number): string {
-  if (value >= 100) {
-    return `₹${(value / 100).toFixed(2)} Cr`;
-  }
-  return `₹${value.toFixed(2)} L`;
-}
+
+
 
 export function getStatusColor(status: StageStatus): string {
   const colors: Record<StageStatus, string> = {
-    pending:     'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25',
-    in_progress: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/25',
-    completed:   'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25',
-    bypassed:    'bg-slate-500/15 text-slate-500 dark:text-slate-400 border-slate-500/25',
-    waiting:     'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/25',
+    pending:                'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25',
+    in_progress:            'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/25',
+    completed:              'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25',
+    bypassed:               'bg-slate-500/15 text-slate-500 dark:text-slate-400 border-slate-500/25',
+    waiting:                'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/25',
+    cancelled:              'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/25',
+    cancellation_requested: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/25',
   };
-  return colors[status];
+  return colors[status] ?? 'bg-slate-500/15 text-slate-500 border-slate-500/25';
 }
 
 export function getStatusLabel(status: StageStatus): string {
   const labels: Record<StageStatus, string> = {
-    pending:     'Pending',
-    in_progress: 'In Progress',
-    completed:   'Completed',
-    bypassed:    'Bypassed',
-    waiting:     'Waiting',
+    pending:                'Pending',
+    in_progress:            'In Progress',
+    completed:              'Completed',
+    bypassed:               'Bypassed',
+    waiting:                'Waiting',
+    cancelled:              'Cancelled',
+    cancellation_requested: 'Cancel Requested',
   };
-  return labels[status];
+  return labels[status] ?? status;
 }
 
 export function getPriorityColor(priority: Priority): string {
@@ -55,8 +55,31 @@ export function getPriorityColor(priority: Priority): string {
 }
 
 export function getStageIndex(stage: string): number {
-  const stages = ['sales', 'survey', 'mapping', 'drafting', 'accounts'];
+  const stages = ['sales', 'survey', 'mapping', 'drawing', 'visualization', 'accounts'];
   return stages.indexOf(stage);
+}
+
+/**
+ * Returns the effective date for a project — scheduledDate takes priority,
+ * then deadline, then createdAt. Used for nearest-first sorting.
+ */
+export function getEffectiveDate(project: import('@/types').Project): Date {
+  return new Date(project.scheduledDate ?? project.deadline ?? project.createdAt);
+}
+
+/**
+ * Sort projects nearest-date-first (ascending).
+ * Projects with a closer scheduledDate or deadline appear at the top.
+ */
+export function sortByNearestDate(projects: import('@/types').Project[]): import('@/types').Project[] {
+  return [...projects].sort((a, b) => getEffectiveDate(a).getTime() - getEffectiveDate(b).getTime());
+}
+
+export function formatCurrency(value: number): string {
+  if (value >= 10000000) return `₹${(value / 10000000).toFixed(2)} Cr`;
+  if (value >= 100000)   return `₹${(value / 100000).toFixed(2)} L`;
+  if (value >= 1000)     return `₹${(value / 1000).toFixed(1)} K`;
+  return `₹${value}`;
 }
 
 export function timeAgo(dateString: string): string {
@@ -84,12 +107,16 @@ export function applyFilters(
   searchQuery: string,
   dateFilter: DateFilter,
   excludeBypassed = false,
+  onlyPending = false, // non-admin: hide completed from view
 ): Project[] {
   // 1. Only projects where this department has been reached
   let result = projects.filter((p) => {
     const s = p.stages[stage].status;
     if (s === 'pending') return false;
     if (excludeBypassed && s === 'bypassed') return false;
+    if (onlyPending && s === 'completed') return false;  // hide completed from non-admin
+    if (onlyPending && s === 'cancelled') return false;  // hide fully cancelled from non-admin workers
+    // cancellation_requested is always visible to the dept that raised it + admin
     return true;
   });
 
@@ -111,7 +138,7 @@ export function applyFilters(
     );
   }
 
-  // 4. Date filter — based on updatedAt
+  // 4. Date filter — based on scheduledDate/deadline/updatedAt
   if (dateFilter !== 'all') {
     const now = new Date();
     const cutoff = new Date(now);
@@ -122,7 +149,8 @@ export function applyFilters(
     result = result.filter((p) => new Date(p.updatedAt) >= cutoff);
   }
 
-  return result;
+  // 5. Sort: nearest scheduledDate or deadline first
+  return sortByNearestDate(result);
 }
 
 /**
