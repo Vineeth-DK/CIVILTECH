@@ -86,6 +86,9 @@ export interface ProjectStore {
   projects: Project[];
   currentUser: User | null;
   isDarkMode: boolean;
+  isInitializing: boolean;
+
+  initProjects: () => Promise<void>;
 
   currentFilter: StatusFilter;
   searchQuery: string;

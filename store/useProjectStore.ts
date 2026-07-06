@@ -6,8 +6,8 @@ import {
   Project, Role, User, PipelineStage, ProjectStore,
   StageStatus, StatusFilter, DateFilter, LeadDetails, NewLead, WorkflowType,
 } from '@/types';
-import { MOCK_PROJECTS } from '@/lib/mockData';
 import { CREDENTIALS } from '@/lib/auth';
+import { fetchProjectsDB, upsertProjectDB, deleteProjectDB } from '@/lib/supabaseSync';
 
 const now = () => new Date().toISOString();
 const bypassed = (): { status: 'bypassed'; completedAt: string } => ({ status: 'bypassed', completedAt: now() });
@@ -77,14 +77,21 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
 }
 
 export const useProjectStore = create<ProjectStore>()(
-  persist(
-    (set, get) => ({
-      projects: MOCK_PROJECTS,
-      currentUser: null,
-      isDarkMode: true,
-      currentFilter: 'all' as StatusFilter,
-      searchQuery: '',
-      dateFilter: 'all' as DateFilter,
+  (set, get) => ({
+    projects: [],
+    currentUser: null,
+    isDarkMode: false,
+    isInitializing: true,
+
+    initProjects: async () => {
+      set({ isInitializing: true });
+      const projects = await fetchProjectsDB();
+      set({ projects, isInitializing: false });
+    },
+
+    currentFilter: 'all' as StatusFilter,
+    searchQuery: '',
+    dateFilter: 'all' as DateFilter,
 
       // ── Auth ──────────────────────────────────────────────────────────────
 
@@ -424,10 +431,25 @@ export const useProjectStore = create<ProjectStore>()(
       },
 
       getAllProjects: () => get().projects,
-    }),
-    {
-      name: 'civiltech-store-v5',
-      partialize: (state) => ({ projects: state.projects, isDarkMode: state.isDarkMode }),
-    },
-  ),
+    })
 );
+
+// Subscribe to store changes to push to Supabase
+useProjectStore.subscribe((state, prevState) => {
+  if (state.projects === prevState.projects) return;
+
+  // Find added or modified projects
+  state.projects.forEach(p => {
+    const prev = prevState.projects.find(old => old.id === p.id);
+    if (!prev || prev !== p) {
+      upsertProjectDB(p);
+    }
+  });
+
+  // Find deleted projects
+  prevState.projects.forEach(prev => {
+    if (!state.projects.find(p => p.id === prev.id)) {
+      deleteProjectDB(prev.id);
+    }
+  });
+});

@@ -10,12 +10,14 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { currentUser } = useProjectStore();
+  const { currentUser, initProjects } = useProjectStore();
   const router = useRouter();
 
   useEffect(() => {
     if (!currentUser) {
       router.push('/');
+    } else {
+      initProjects();
     }
   }, [currentUser, router]);
 

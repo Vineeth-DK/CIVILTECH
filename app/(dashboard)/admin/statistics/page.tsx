@@ -10,9 +10,7 @@ import { useProjectStore } from '@/store/useProjectStore';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils';
-import { PipelineStage } from '@/types';
-
-type Period = 'week' | 'month' | 'year' | 'all';
+import { PipelineStage, DateFilter } from '@/types';
 
 const DEPT_META: { stage: PipelineStage; label: string; icon: React.FC<{ className?: string }>; color: string; bg: string }[] = [
   { stage: 'sales',         label: 'Sales',            icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-500/10' },
@@ -24,21 +22,24 @@ const DEPT_META: { stage: PipelineStage; label: string; icon: React.FC<{ classNa
 ];
 
 export default function AdminStatisticsPage() {
-  const { getAllProjects } = useProjectStore();
+  const { getAllProjects, dateFilter } = useProjectStore();
   const allProjects = getAllProjects();
-  const [period, setPeriod] = useState<Period>('month');
 
   // Date cutoff based on selected period
   const cutoff = useMemo(() => {
-    if (period === 'all') return new Date(0);
+    if (dateFilter === 'all') return new Date(0);
     const d = new Date();
-    if (period === 'week')  d.setDate(d.getDate() - 7);
-    if (period === 'month') d.setMonth(d.getMonth() - 1);
-    if (period === 'year')  d.setFullYear(d.getFullYear() - 1);
+    if (dateFilter === 'today') d.setHours(0, 0, 0, 0);
+    if (dateFilter === 'week')  d.setDate(d.getDate() - 7);
+    if (dateFilter === 'month') d.setMonth(d.getMonth() - 1);
+    if (dateFilter === 'year')  d.setFullYear(d.getFullYear() - 1);
     return d;
-  }, [period]);
+  }, [dateFilter]);
 
-  const filtered = allProjects.filter((p) => new Date(p.updatedAt) >= cutoff);
+  const filtered = allProjects.filter((p) => {
+    const d = p.scheduledDate ?? p.deadline ?? p.createdAt;
+    return new Date(d) >= cutoff;
+  });
 
   const totalRevenue = filtered.reduce((sum, p) => sum + (p.value ?? 0), 0);
   const completed    = filtered.filter((p) => Object.values(p.stages).every((s) => s.status === 'completed' || s.status === 'bypassed'));
@@ -65,12 +66,7 @@ export default function AdminStatisticsPage() {
 
   const maxWfCount = Math.max(...wfBreakdown.map((w) => w.count), 1);
 
-  const PERIODS: { id: Period; label: string }[] = [
-    { id: 'week', label: 'This Week' },
-    { id: 'month', label: 'This Month' },
-    { id: 'year', label: 'This Year' },
-    { id: 'all', label: 'All Time' },
-  ];
+
 
   const handleExport = () => {
     const header = ['ID', 'Name', 'Client', 'Type', 'Workflow', 'Current Stage', 'Value (INR)', 'Created At', 'Scheduled Date/Deadline', 'Status'];
@@ -91,7 +87,7 @@ export default function AdminStatisticsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CivilTech_Export_${period}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `CivilTech_Export_${dateFilter}_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -101,19 +97,8 @@ export default function AdminStatisticsPage() {
       <Topbar title="Statistics" subtitle="Department & project performance analytics" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
 
-        {/* ── Period Selector & Export ──────────────────────────────────────── */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mr-2">Period:</p>
-            {PERIODS.map((p) => (
-              <button key={p.id} onClick={() => setPeriod(p.id)}
-                className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
-                  period === p.id
-                    ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300'
-                    : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
-                }`}>{p.label}</button>
-            ))}
-          </div>
+        {/* ── Export ───────────────────────────────────────────────────────── */}
+        <div className="flex items-center justify-end">
           <Button variant="primary" size="sm" icon={<Download className="w-4 h-4" />} onClick={handleExport}>
             Export to Excel
           </Button>
