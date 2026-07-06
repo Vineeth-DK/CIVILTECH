@@ -23,7 +23,6 @@ const ADMIN_NAV = [
 
 // Dept navigation (all roles have one of these)
 const NAV_ITEMS = [
-  { role: 'admin'         as Role, href: '/admin',         icon: ShieldCheck, label: 'Admin Overview',    active: 'text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20' },
   { role: 'sales'         as Role, href: '/sales',         icon: TrendingUp,  label: 'Sales',             active: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
   { role: 'survey'        as Role, href: '/survey',        icon: Map,         label: 'Survey',            active: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20' },
   { role: 'mapping'       as Role, href: '/mapping',       icon: Layers,      label: 'Mapping',           active: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
@@ -72,21 +71,19 @@ export function Sidebar() {
       className="relative h-screen flex flex-col glass border-r border-slate-200/50 dark:border-white/5 overflow-hidden z-20 flex-shrink-0"
     >
       {/* ── Logo + collapse toggle (fully inside sidebar) ────────────────── */}
-      <div className="flex items-center gap-2.5 px-3 py-3 border-b border-slate-200/50 dark:border-white/5 min-h-[56px]">
+      <div className={cn("relative flex items-center px-3 py-3 border-b border-slate-200/50 dark:border-white/5 min-h-[56px]", collapsed ? "justify-center" : "gap-2.5")}>
         {/* Logo */}
-        <div className={cn(
-          'relative flex-shrink-0 rounded-xl overflow-hidden bg-white dark:bg-white/90 transition-all duration-200',
-          collapsed ? 'w-9 h-9' : 'w-28 h-9'
-        )}>
-          <Image src="/logo.png" alt="CivilTech" fill sizes="112px" className="object-contain p-0.5" priority />
-        </div>
-        <AnimatePresence>
-          {!collapsed && (
+        {!collapsed && (
+          <>
+            <div className="relative flex-shrink-0 transition-all duration-200 w-32 h-10">
+              <Image src="/logo.png" alt="CivilTech" fill sizes="128px" className="object-contain dark:hidden" priority />
+              <Image src="/logo-white.png" alt="CivilTech" fill sizes="128px" className="object-contain hidden dark:block" priority />
+            </div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="min-w-0 flex-1">
               <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">Workflow Platform</p>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </>
+        )}
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setCollapsed(!collapsed)}
@@ -96,7 +93,7 @@ export function Sidebar() {
             'bg-slate-100 dark:bg-white/8 border border-slate-200 dark:border-white/10',
             'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
             'hover:bg-slate-200 dark:hover:bg-white/15',
-            'ml-auto'
+            collapsed ? '' : 'ml-auto'
           )}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

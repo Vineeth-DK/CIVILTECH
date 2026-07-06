@@ -4,12 +4,13 @@ import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart3, Activity, XCircle, CheckCircle2, PlusCircle,
-  TrendingUp, Map, Layers, PenTool, Box, DollarSign, Layers3,
+  TrendingUp, Map, Layers, PenTool, Box, DollarSign, Layers3, Trash2,
 } from 'lucide-react';
 import { useProjectStore } from '@/store/useProjectStore';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { StatsRow } from '@/components/dashboard/StatsRow';
 import { ProjectTimeline } from '@/components/dashboard/ProjectTimeline';
+import { DeleteModal } from '@/components/dashboard/ActionModal';
 import { PriorityBadge } from '@/components/ui/Badge';
 import { AddLeadModal } from '@/components/dashboard/AddLeadModal';
 import { formatDate, formatCurrency, sortByNearestDate } from '@/lib/utils';
@@ -189,7 +190,7 @@ function DeptSection({ stage, label, color, Icon, projects }: {
 function AdminProjectRow({ project, index, highlightStage }: {
   project: Project; index: number; highlightStage?: PipelineStage;
 }) {
-  const { currentUser } = useProjectStore();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const stageColors: Record<string, string> = {
     sales:         'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20',
     survey:        'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20',
@@ -213,7 +214,6 @@ function AdminProjectRow({ project, index, highlightStage }: {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             <span className="text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">{project.id}</span>
-            <PriorityBadge priority={project.priority} />
             <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${stageColors[project.currentStage]}`}>{stageLabel[project.currentStage]}</span>
             <span className="text-[10px] text-slate-400 dark:text-slate-500">{wfLabel[project.workflowType]}</span>
             {cancelRequested && (
@@ -233,16 +233,20 @@ function AdminProjectRow({ project, index, highlightStage }: {
             <p className="text-xs text-orange-600 dark:text-orange-400 mt-0.5 italic">"{project.stages[highlightStage].cancelReason}"</p>
           )}
         </div>
-        <div className="text-right flex-shrink-0">
+        <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
           <p className="text-xs text-slate-400 dark:text-slate-500">{formatDate(project.createdAt)}</p>
           {displayDate && (
-            <p className={`text-xs mt-0.5 ${isScheduled ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
+            <p className={`text-xs ${isScheduled ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
               {isScheduled ? '📅' : '⏰'} {formatDate(displayDate)}
             </p>
           )}
+          <button onClick={() => setIsDeleteOpen(true)} className="p-1 mt-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors">
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
       <ProjectTimeline project={project} />
+      <DeleteModal project={project} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
     </motion.div>
   );
 }

@@ -4,10 +4,11 @@ import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart2, TrendingUp, CheckCircle2, XCircle, Clock, IndianRupee,
-  Map, Layers, PenTool, Box, DollarSign, AlertTriangle, Zap,
+  Map, Layers, PenTool, Box, DollarSign, AlertTriangle, Zap, Download,
 } from 'lucide-react';
 import { useProjectStore } from '@/store/useProjectStore';
 import { Topbar } from '@/components/dashboard/Topbar';
+import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils';
 import { PipelineStage } from '@/types';
 
@@ -71,29 +72,58 @@ export default function AdminStatisticsPage() {
     { id: 'all', label: 'All Time' },
   ];
 
+  const handleExport = () => {
+    const header = ['ID', 'Name', 'Client', 'Type', 'Workflow', 'Current Stage', 'Value (INR)', 'Created At', 'Scheduled Date/Deadline', 'Status'];
+    const rows = filtered.map(p => [
+      p.id,
+      `"${p.name.replace(/"/g, '""')}"`,
+      `"${p.client.replace(/"/g, '""')}"`,
+      `"${p.type.replace(/"/g, '""')}"`,
+      p.workflowType,
+      p.currentStage,
+      p.value,
+      new Date(p.createdAt).toLocaleDateString(),
+      p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString() : p.deadline ? new Date(p.deadline).toLocaleDateString() : '',
+      p.stages[p.currentStage]?.status ?? 'unknown'
+    ]);
+    const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CivilTech_Export_${period}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <Topbar title="Statistics" subtitle="Department & project performance analytics" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
 
-        {/* ── Period Selector ───────────────────────────────────────────────── */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mr-2">Period:</p>
-          {PERIODS.map((p) => (
-            <button key={p.id} onClick={() => setPeriod(p.id)}
-              className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
-                period === p.id
-                  ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300'
-                  : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
-              }`}>{p.label}</button>
-          ))}
+        {/* ── Period Selector & Export ──────────────────────────────────────── */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mr-2">Period:</p>
+            {PERIODS.map((p) => (
+              <button key={p.id} onClick={() => setPeriod(p.id)}
+                className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+                  period === p.id
+                    ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300'
+                    : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+                }`}>{p.label}</button>
+            ))}
+          </div>
+          <Button variant="primary" size="sm" icon={<Download className="w-4 h-4" />} onClick={handleExport}>
+            Export to Excel
+          </Button>
         </div>
 
         {/* ── KPI Cards ────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: 'Total Projects',  value: filtered.length, icon: <BarChart2 className="w-5 h-5" />,      color: 'text-violet-500', bg: 'bg-violet-500/10' },
-            { label: 'Revenue',          value: `₹${formatCurrency(totalRevenue)}`, icon: <IndianRupee className="w-5 h-5" />, color: 'text-emerald-500', bg: 'bg-emerald-500/10', raw: true },
+            { label: 'Revenue',          value: formatCurrency(totalRevenue), icon: <IndianRupee className="w-5 h-5" />, color: 'text-emerald-500', bg: 'bg-emerald-500/10', raw: true },
             { label: 'Completed',        value: completed.length, icon: <CheckCircle2 className="w-5 h-5" />,  color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
             { label: 'Cancelled',        value: cancelled.length, icon: <XCircle className="w-5 h-5" />,       color: 'text-red-500',     bg: 'bg-red-500/10' },
           ].map((kpi) => (

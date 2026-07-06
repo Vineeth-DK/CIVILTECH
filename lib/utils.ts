@@ -146,7 +146,10 @@ export function applyFilters(
     if (dateFilter === 'week')  cutoff.setDate(cutoff.getDate() - 7);
     if (dateFilter === 'month') cutoff.setMonth(cutoff.getMonth() - 1);
     if (dateFilter === 'year')  cutoff.setFullYear(cutoff.getFullYear() - 1);
-    result = result.filter((p) => new Date(p.updatedAt) >= cutoff);
+    result = result.filter((p) => {
+      const d = p.stages[stage]?.scheduledDate ?? p.scheduledDate ?? p.deadline ?? p.createdAt;
+      return new Date(d) >= cutoff;
+    });
   }
 
   // 5. Sort: nearest scheduledDate or deadline first
@@ -181,7 +184,10 @@ export function applyAdminFilters(
     if (dateFilter === 'week')  cutoff.setDate(cutoff.getDate() - 7);
     if (dateFilter === 'month') cutoff.setMonth(cutoff.getMonth() - 1);
     if (dateFilter === 'year')  cutoff.setFullYear(cutoff.getFullYear() - 1);
-    result = result.filter((p) => new Date(p.updatedAt) >= cutoff);
+    result = result.filter((p) => {
+      const d = p.scheduledDate ?? p.deadline ?? p.createdAt;
+      return new Date(d) >= cutoff;
+    });
   }
 
   return result;

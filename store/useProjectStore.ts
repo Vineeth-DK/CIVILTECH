@@ -29,12 +29,24 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
         accounts:      pending,
       };
 
+    case 'survey_mapping':
     case 'mapping':
       // Survey first → Mapping → Accounts
       return {
         sales,
         survey:        pending,
         mapping:       pending,
+        drawing:       bypassed(),
+        visualization: bypassed(),
+        accounts:      pending,
+      };
+
+    case 'survey_only':
+      // Survey first → Accounts (no mapping)
+      return {
+        sales,
+        survey:        pending,
+        mapping:       bypassed(),
         drawing:       bypassed(),
         visualization: bypassed(),
         accounts:      pending,
@@ -334,6 +346,44 @@ export const useProjectStore = create<ProjectStore>()(
                 },
               } };
           }),
+        }));
+      },
+
+      /** Worker reverts the project back to the previous completed department due to an issue */
+      revertProject: (projectId: string, fromStage: PipelineStage, reason: string) => {
+        set((state) => ({
+          projects: state.projects.map((p) => {
+            if (p.id !== projectId) return p;
+            const STAGES: PipelineStage[] = ['sales', 'survey', 'mapping', 'drawing', 'visualization', 'accounts'];
+            const currentIndex = STAGES.indexOf(fromStage);
+            let prevStage: PipelineStage | null = null;
+            
+            // Find the most recent stage before this one that is 'completed'
+            for (let i = currentIndex - 1; i >= 0; i--) {
+              if (p.stages[STAGES[i]].status === 'completed') {
+                prevStage = STAGES[i];
+                break;
+              }
+            }
+            if (!prevStage) return p; // Cannot revert if no previous stage
+
+            return {
+              ...p,
+              currentStage: prevStage,
+              updatedAt: now(),
+              stages: {
+                ...p.stages,
+                [fromStage]: { ...p.stages[fromStage], status: 'pending' as StageStatus, cancelReason: undefined },
+                [prevStage]: { ...p.stages[prevStage], status: 'in_progress' as StageStatus, notes: `⚠️ Reverted from ${fromStage}. Reason: ${reason}` }
+              }
+            };
+          }),
+        }));
+      },
+
+      deleteProject: (projectId: string) => {
+        set((state) => ({
+          projects: state.projects.filter((p) => p.id !== projectId),
         }));
       },
 

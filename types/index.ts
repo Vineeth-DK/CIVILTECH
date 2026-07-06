@@ -19,7 +19,7 @@ export type PipelineStage = 'sales' | 'survey' | 'mapping' | 'drawing' | 'visual
  * - drawing:       Sales → Drawing → Accounts
  * - visualization: Sales → 3D Visualization → Accounts
  */
-export type WorkflowType = 'marking' | 'mapping' | 'drawing' | 'visualization';
+export type WorkflowType = 'marking' | 'mapping' | 'drawing' | 'visualization' | 'survey_only' | 'survey_mapping';
 
 export interface StageRecord {
   status: StageStatus;
@@ -115,10 +115,12 @@ export interface ProjectStore {
   completeVisualization: (projectId: string) => void;
   completeAccounts: (projectId: string) => void;
 
-  // Cancel / reschedule
+  // Cancel / reschedule / revert / delete
   requestCancellation: (projectId: string, stage: PipelineStage, reason: string) => void;
   approveCancellation: (projectId: string, stage: PipelineStage) => void;
   reassignProject: (projectId: string, fromStage: PipelineStage, toStage: PipelineStage, newDate?: string) => void;
+  revertProject: (projectId: string, fromStage: PipelineStage, reason: string) => void;
+  deleteProject: (projectId: string) => void;
   cancelStage: (projectId: string, stage: PipelineStage, reason: string) => void;
   rescheduleStage: (projectId: string, stage: PipelineStage, newDate?: string) => void;
 

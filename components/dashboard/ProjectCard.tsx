@@ -2,13 +2,13 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { MapPin, Building2, Calendar, ChevronRight, Phone, ExternalLink, StickyNote, Clock, IndianRupee, XCircle, CalendarClock, AlertCircle } from 'lucide-react';
+import { MapPin, Building2, Calendar, ChevronRight, Phone, ExternalLink, StickyNote, Clock, IndianRupee, XCircle, CalendarClock, AlertCircle, ArrowRightLeft } from 'lucide-react';
 import { Project, PipelineStage } from '@/types';
 import { StatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatDate, formatCurrency, cn } from '@/lib/utils';
 import { useProjectStore } from '@/store/useProjectStore';
-import { CancelModal, RescheduleModal } from '@/components/dashboard/ActionModal';
+import { CancelModal, RescheduleModal, RevertModal } from '@/components/dashboard/ActionModal';
 
 /** Roles that can see project financial value */
 const VALUE_VISIBLE_ROLES = ['admin', 'sales', 'accounts'];
@@ -43,6 +43,7 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
   const [expanded, setExpanded]       = useState(false);
   const [isCancelOpen, setIsCancelOpen]     = useState(false);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [isRevertOpen, setIsRevertOpen]         = useState(false);
 
   const { currentUser } = useProjectStore();
   const role = currentUser?.role ?? 'admin';
@@ -56,6 +57,10 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
 
   const resolvedLabel = typeof actionLabel === 'function' ? actionLabel(project) : actionLabel;
   const canAct = onAction && resolvedLabel && stageRecord.status === 'in_progress';
+
+  const STAGES: PipelineStage[] = ['sales', 'survey', 'mapping', 'drawing', 'visualization', 'accounts'];
+  const currentIndex = STAGES.indexOf(stage);
+  const hasCompletedPrev = STAGES.slice(0, currentIndex).some(s => project.stages[s]?.status === 'completed');
 
   // Date display logic
   const displayDate = isFieldStage
@@ -222,14 +227,32 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
               </Button>
             )}
 
-            {/* Cancel button — available to dept worker only if in_progress (not already requested) */}
+            {/* Cancel / Revert buttons — available to dept worker only if in_progress (not already requested) */}
             {!showReschedule && !isCancelled && !isCancelRequested && stageRecord.status === 'in_progress' && role !== 'admin' && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setIsCancelOpen(true); }}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-200 dark:border-red-500/20 transition-all"
-              >
-                <XCircle className="w-3.5 h-3.5" /> Request Cancellation
-              </button>
+              <div className="flex gap-2 w-full mt-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setIsCancelOpen(true); }}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-200 dark:border-red-500/20 transition-all"
+                >
+                  <XCircle className="w-3.5 h-3.5" /> Request Cancel
+                </button>
+                {hasCompletedPrev && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsRevertOpen(true); }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-medium text-amber-500 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 transition-all"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" /> Revert Project
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Survey-only direct reschedule button (does not change status) */}
+            {!isCancelled && stageRecord.status === 'in_progress' && role === 'survey' && stage === 'survey' && (
+              <Button variant="secondary" size="sm" className="w-full mt-2"
+                onClick={(e) => { e.stopPropagation(); setIsRescheduleOpen(true); }}>
+                Reschedule Visit (Client Request)
+              </Button>
             )}
           </motion.div>
         )}
@@ -240,6 +263,8 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
         onClose={() => setIsCancelOpen(false)} />
       <RescheduleModal project={project} stage={stage} isOpen={isRescheduleOpen}
         onClose={() => setIsRescheduleOpen(false)} />
+      <RevertModal project={project} stage={stage} isOpen={isRevertOpen}
+        onClose={() => setIsRevertOpen(false)} />
     </>
   );
 }

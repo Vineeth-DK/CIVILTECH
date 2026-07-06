@@ -104,8 +104,9 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div className="text-center mb-10 mt-4">
-          <div className="relative w-full h-32 max-w-[400px] mx-auto dark:bg-white/95 dark:backdrop-blur-md rounded-2xl dark:shadow-xl dark:shadow-white/5 transition-all duration-300">
-            <Image src="/logo.png" alt="CivilTech Logo" fill className="object-contain p-0 dark:p-3" priority />
+          <div className="relative w-full h-32 max-w-[400px] mx-auto drop-shadow-sm dark:drop-shadow-none">
+            <Image src="/logo.png" alt="CivilTech Logo" fill className="object-contain dark:hidden" priority />
+            <Image src="/logo-white.png" alt="CivilTech Logo" fill className="object-contain hidden dark:block" priority />
           </div>
         </div>
 
@@ -135,7 +136,7 @@ export default function LoginPage() {
                   placeholder="e.g. admin, sales, survey…"
                   autoComplete="username"
                   className={cn(
-                    'input-base pl-9',
+                    'input-base !pl-10',
                     error && 'border-red-400 dark:border-red-500/70 ring-2 ring-red-400/20'
                   )}
                 />
@@ -156,7 +157,7 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   className={cn(
-                    'input-base pl-9 pr-10',
+                    'input-base !pl-10 pr-10',
                     error && 'border-red-400 dark:border-red-500/70 ring-2 ring-red-400/20'
                   )}
                 />

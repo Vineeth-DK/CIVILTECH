@@ -7,7 +7,7 @@ import { Project, LeadDetails, PipelineStage } from '@/types';
 import { useProjectStore } from '@/store/useProjectStore';
 import {
   CheckCircle, GitBranch, Navigation, Phone, AlertTriangle,
-  XCircle, CalendarClock, RotateCcw, Send, ArrowRightLeft,
+  XCircle, CalendarClock, RotateCcw, Send, ArrowRightLeft, Trash2,
 } from 'lucide-react';
 import { cn, formatDate } from '@/lib/utils';
 
@@ -72,7 +72,7 @@ export function SalesActionModal({ project, isOpen, onClose }: {
           <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Client Mobile <span className="text-red-400">*</span></label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+91 98765 43210" className="input-base pl-9" />
+            <input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+91 98765 43210" className="w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20" />
           </div>
         </div>
         <div className="flex gap-3 pt-1">
@@ -258,6 +258,54 @@ export function CancelModal({ project, stage, isOpen, onClose }: {
   );
 }
 
+// ─── Revert Modal — worker sends project back to previous completed stage ──────
+
+export function RevertModal({ project, stage, isOpen, onClose }: {
+  project: Project | null; stage: PipelineStage; isOpen: boolean; onClose: () => void;
+}) {
+  const [reason, setReason]       = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { revertProject } = useProjectStore();
+
+  const handleConfirm = async () => {
+    if (!project || reason.trim().length < 10) return;
+    setIsLoading(true);
+    await new Promise((r) => setTimeout(r, 500));
+    revertProject(project.id, stage, reason.trim());
+    setIsLoading(false);
+    handleClose();
+  };
+
+  const handleClose = () => { onClose(); setReason(''); };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} title="Revert to Previous Dept" description={project?.name ?? ''}>
+      <div className="space-y-4">
+        <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <p>The project will be sent <strong>backwards</strong> to the last completed department so they can resolve the issue.</p>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+            Reason for Reverting <span className="text-red-400">*</span>
+          </label>
+          <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3}
+            placeholder="Describe the issue that needs to be fixed (min 10 chars)…"
+            className="w-full px-3 py-2.5 rounded-xl border text-sm bg-white dark:bg-white/5 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/40 resize-none transition-all" />
+          <p className="text-[11px] text-slate-400 dark:text-slate-500">{reason.trim().length}/10 min characters</p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Go Back</Button>
+          <Button variant="primary" size="md" className="flex-1" disabled={reason.trim().length < 10} isLoading={isLoading}
+            icon={<ArrowRightLeft className="w-4 h-4" />} onClick={handleConfirm}>
+            Revert Project
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 // ─── Admin Cancel Review Modal — approve or reassign ─────────────────────────
 
 export function AdminCancelReviewModal({ project, stage, isOpen, onClose }: {
@@ -390,12 +438,60 @@ export function RescheduleModal({ project, stage, isOpen, onClose }: {
           <div className="relative">
             <CalendarClock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
             <input type={isFieldStage ? 'datetime-local' : 'date'} value={newDate} onChange={(e) => setNewDate(e.target.value)}
-              className="w-full h-10 pl-9 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
+              min={isFieldStage ? new Date().toISOString().slice(0, 16) : new Date().toISOString().split('T')[0]}
+              className="w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
           </div>
         </div>
         <div className="flex gap-3">
           <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Cancel</Button>
           <Button variant="primary" size="md" className="flex-1" isLoading={isLoading} icon={<RotateCcw className="w-4 h-4" />} onClick={handleConfirm}>Reschedule</Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── Delete Modal — admin permanently deletes a project ──────────────────────
+
+export function DeleteModal({ project, isOpen, onClose }: {
+  project: Project | null; isOpen: boolean; onClose: () => void;
+}) {
+  const [confirmText, setConfirmText] = useState('');
+  const [isLoading, setIsLoading]     = useState(false);
+  const { deleteProject } = useProjectStore();
+
+  const handleConfirm = async () => {
+    if (!project || confirmText !== 'DELETE') return;
+    setIsLoading(true);
+    await new Promise((r) => setTimeout(r, 500));
+    deleteProject(project.id);
+    setIsLoading(false);
+    handleClose();
+  };
+
+  const handleClose = () => { onClose(); setConfirmText(''); };
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} title="Permanently Delete Project" description={project?.name ?? ''}>
+      <div className="space-y-4">
+        <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs text-red-700 dark:text-red-300 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <p>This action is <strong>irreversible</strong>. The project and all its data will be permanently wiped from the system.</p>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+            Type "DELETE" to confirm
+          </label>
+          <input type="text" value={confirmText} onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="DELETE"
+            className="w-full h-10 px-3 rounded-xl border text-sm font-mono tracking-widest uppercase bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-red-500/40 transition-all" />
+        </div>
+        <div className="flex gap-3 pt-2">
+          <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Cancel</Button>
+          <Button variant="primary" size="md" className="flex-1 !bg-red-500 hover:!bg-red-600 dark:!bg-red-600 dark:hover:!bg-red-700 !border-transparent text-white" disabled={confirmText !== 'DELETE'} isLoading={isLoading}
+            icon={<Trash2 className="w-4 h-4" />} onClick={handleConfirm}>
+            Delete Forever
+          </Button>
         </div>
       </div>
     </Modal>
