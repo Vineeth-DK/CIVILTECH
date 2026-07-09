@@ -77,8 +77,8 @@ export function Sidebar() {
         {/* Logo */}
         {!collapsed && (
           <>
-            <div className="relative flex-shrink-0 transition-all duration-200 w-32 h-10">
-              <Image src="/logo.png" alt="CivilTech" fill sizes="128px" className="object-contain" priority />
+            <div className="relative flex-shrink-0 transition-all duration-200 w-32 h-10 dark:bg-white/95 dark:px-2 dark:py-1 dark:rounded-lg shadow-sm dark:shadow-white/10 flex items-center justify-center">
+              <Image src="/logo.png" alt="CivilTech" fill sizes="128px" className="object-contain p-1" priority />
             </div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="min-w-0 flex-1">
               <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">Workflow Platform</p>

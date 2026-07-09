@@ -102,10 +102,9 @@ export default function LoginPage() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="relative w-full max-w-md"
       >
-        {/* Logo */}
         <div className="text-center mb-10 mt-4">
-          <div className="relative w-full h-32 max-w-[400px] mx-auto drop-shadow-sm dark:drop-shadow-none">
-            <Image src="/logo.png" alt="CivilTech Logo" fill sizes="128px" className="object-contain" priority />
+          <div className="relative w-full h-32 max-w-[400px] mx-auto drop-shadow-sm dark:drop-shadow-none dark:bg-white/95 dark:rounded-2xl dark:p-4 flex items-center justify-center">
+            <Image src="/logo.png" alt="CivilTech Logo" fill sizes="128px" className="object-contain p-2" priority />
           </div>
         </div>
 
@@ -120,7 +119,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate suppressHydrationWarning>
             {/* Username */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
