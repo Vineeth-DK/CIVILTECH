@@ -65,3 +65,16 @@ export async function deleteProjectDB(id: string) {
   const { error } = await supabase.from('projects').delete().eq('id', id);
   if (error) console.error('Error deleting project', error);
 }
+
+export function subscribeProjectsDB(onUpdate: () => void) {
+  const channel = supabase
+    .channel('public:projects')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => {
+      onUpdate();
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}

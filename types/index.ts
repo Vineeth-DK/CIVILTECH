@@ -88,6 +88,7 @@ export interface ProjectStore {
   currentUser: User | null;
   isDarkMode: boolean;
   isInitializing: boolean;
+  isSyncing: boolean;
 
   initProjects: () => Promise<void>;
 

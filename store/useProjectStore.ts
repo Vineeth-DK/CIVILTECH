@@ -7,7 +7,7 @@ import {
   StageStatus, StatusFilter, DateFilter, LeadDetails, NewLead, WorkflowType,
 } from '@/types';
 import { CREDENTIALS } from '@/lib/auth';
-import { fetchProjectsDB, upsertProjectDB, deleteProjectDB } from '@/lib/supabaseSync';
+import { fetchProjectsDB, upsertProjectDB, deleteProjectDB, subscribeProjectsDB } from '@/lib/supabaseSync';
 
 const now = () => new Date().toISOString();
 const bypassed = (): { status: 'bypassed'; completedAt: string } => ({ status: 'bypassed', completedAt: now() });
@@ -98,11 +98,20 @@ export const useProjectStore = create<ProjectStore>()(
     currentUser: null,
     isDarkMode: false,
     isInitializing: true,
+    isSyncing: false,
 
     initProjects: async () => {
       set({ isInitializing: true });
       const projects = await fetchProjectsDB();
       set({ projects, isInitializing: false });
+
+      // Subscribe to real-time changes
+      subscribeProjectsDB(async () => {
+        // Refetch all projects on any change
+        const latestProjects = await fetchProjectsDB();
+        set({ isSyncing: true, projects: latestProjects });
+        setTimeout(() => set({ isSyncing: false }), 0);
+      });
     },
 
     currentFilter: 'all' as StatusFilter,
@@ -477,6 +486,7 @@ export const useProjectStore = create<ProjectStore>()(
 
 // Subscribe to store changes to push to Supabase
 useProjectStore.subscribe((state, prevState) => {
+  if (state.isSyncing) return;
   if (state.projects === prevState.projects) return;
 
   // Find added or modified projects
