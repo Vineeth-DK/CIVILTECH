@@ -228,7 +228,7 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
             )}
 
             {/* Cancel / Revert buttons — available to dept worker only if in_progress (not already requested) */}
-            {!showReschedule && !isCancelled && !isCancelRequested && stageRecord.status === 'in_progress' && role !== 'admin' && (
+            {!showReschedule && !isCancelled && !isCancelRequested && stageRecord.status === 'in_progress' && (
               <div className="flex gap-2 w-full mt-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); setIsCancelOpen(true); }}

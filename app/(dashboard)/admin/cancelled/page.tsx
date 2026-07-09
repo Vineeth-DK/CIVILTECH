@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XCircle, AlertTriangle, CheckCircle2, RotateCcw, Clock, Building2, MapPin } from 'lucide-react';
+import { XCircle, AlertTriangle, CheckCircle2, RotateCcw, Clock, Building2, MapPin, Trash2 } from 'lucide-react';
 import { useProjectStore } from '@/store/useProjectStore';
 import { Topbar } from '@/components/dashboard/Topbar';
-import { AdminCancelReviewModal, RescheduleModal } from '@/components/dashboard/ActionModal';
+import { AdminCancelReviewModal, RescheduleModal, DeleteModal } from '@/components/dashboard/ActionModal';
 import { formatDate, sortByNearestDate } from '@/lib/utils';
 import { PipelineStage, Project } from '@/types';
 
@@ -158,6 +158,7 @@ function CancelRequestCard({ project, stage, index }: { project: Project; stage:
 
 function CancelledProjectCard({ project, stage, index }: { project: Project; stage: PipelineStage; index: number }) {
   const [isReschedOpen, setIsReschedOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const record = project.stages[stage];
 
   return (
@@ -185,9 +186,14 @@ function CancelledProjectCard({ project, stage, index }: { project: Project; sta
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all hover:-translate-y-0.5">
             <RotateCcw className="w-3 h-3" /> Reschedule
           </button>
+          <button onClick={() => setIsDeleteOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 transition-all hover:-translate-y-0.5">
+            <Trash2 className="w-3 h-3" /> Delete Project
+          </button>
         </div>
       </div>
       <RescheduleModal project={project} stage={stage} isOpen={isReschedOpen} onClose={() => setIsReschedOpen(false)} />
+      <DeleteModal project={project} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} />
     </motion.div>
   );
 }

@@ -44,10 +44,10 @@ export function SalesActionModal({ project, isOpen, onClose }: {
   };
 
   const handleConfirm = async () => {
-    if (!project || clientPhone.trim().length < 10) return;
+    if (!project) return;
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    confirmLead(project.id, { clientPhone: clientPhone.trim() } as LeadDetails);
+    confirmLead(project.id, { clientPhone: project.clientPhone } as LeadDetails);
     setIsLoading(false);
     handleClose();
   };
@@ -68,16 +68,9 @@ export function SalesActionModal({ project, isOpen, onClose }: {
             {project.deadline && <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⏰ Deadline: {formatDate(project.deadline)}</p>}
           </div>
         )}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Client Mobile <span className="text-red-400">*</span></label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <input type="tel" value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+91 98765 43210" className="w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20" />
-          </div>
-        </div>
         <div className="flex gap-3 pt-1">
           <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" size="md" className="flex-1" disabled={clientPhone.trim().length < 10} isLoading={isLoading} icon={<CheckCircle className="w-4 h-4" />} onClick={handleConfirm}>Confirm Lead</Button>
+          <Button variant="primary" size="md" className="flex-1" isLoading={isLoading} icon={<CheckCircle className="w-4 h-4" />} onClick={handleConfirm}>Confirm Lead</Button>
         </div>
       </div>
     </Modal>
