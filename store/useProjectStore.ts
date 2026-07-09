@@ -92,6 +92,8 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
   }
 }
 
+let currentUnsubscribe: (() => void) | null = null;
+
 export const useProjectStore = create<ProjectStore>()(
   (set, get) => ({
     projects: [],
@@ -105,8 +107,10 @@ export const useProjectStore = create<ProjectStore>()(
       const projects = await fetchProjectsDB();
       set({ projects, isInitializing: false });
 
+      if (currentUnsubscribe) currentUnsubscribe();
+
       // Subscribe to real-time changes
-      subscribeProjectsDB(async () => {
+      currentUnsubscribe = subscribeProjectsDB(async () => {
         // Refetch all projects on any change
         const latestProjects = await fetchProjectsDB();
         set({ isSyncing: true, projects: latestProjects });

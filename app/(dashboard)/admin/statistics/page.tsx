@@ -18,6 +18,7 @@ const DEPT_META: { stage: PipelineStage; label: string; icon: React.FC<{ classNa
   { stage: 'mapping',       label: 'Mapping',          icon: Layers,     color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10' },
   { stage: 'drawing',       label: 'Drawing',          icon: PenTool,    color: 'text-pink-600 dark:text-pink-400',    bg: 'bg-pink-500/10' },
   { stage: 'visualization', label: '3D Visualization', icon: Box,        color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-500/10' },
+  { stage: 'qs_boq',        label: 'QS & BOQ',         icon: Layers,     color: 'text-fuchsia-600 dark:text-fuchsia-400', bg: 'bg-fuchsia-500/10' },
   { stage: 'accounts',      label: 'Accounts',         icon: DollarSign, color: 'text-sky-600 dark:text-sky-400',      bg: 'bg-sky-500/10' },
 ];
 

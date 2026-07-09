@@ -67,8 +67,9 @@ export async function deleteProjectDB(id: string) {
 }
 
 export function subscribeProjectsDB(onUpdate: () => void) {
+  const channelName = 'projects-changes-' + Math.random().toString(36).substring(7);
   const channel = supabase
-    .channel('public:projects')
+    .channel(channelName)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => {
       onUpdate();
     })
