@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'sales' | 'survey' | 'mapping' | 'drawing' | 'visualization' | 'accounts';
+export type Role = 'admin' | 'sales' | 'survey' | 'mapping' | 'drawing' | 'visualization' | 'qs_boq' | 'accounts';
 
 export type StageStatus = 'pending' | 'in_progress' | 'completed' | 'bypassed' | 'cancelled' | 'waiting' | 'cancellation_requested';
 
@@ -10,7 +10,7 @@ export type Priority = 'low' | 'medium' | 'high' | 'critical';
 
 export type ProjectType = string; // Allows predefined types + custom "Other" entries
 
-export type PipelineStage = 'sales' | 'survey' | 'mapping' | 'drawing' | 'visualization' | 'accounts';
+export type PipelineStage = 'sales' | 'survey' | 'mapping' | 'drawing' | 'visualization' | 'qs_boq' | 'accounts';
 
 /**
  * Determines the entire workflow pipeline for a project.
@@ -19,7 +19,7 @@ export type PipelineStage = 'sales' | 'survey' | 'mapping' | 'drawing' | 'visual
  * - drawing:       Sales → Drawing → Accounts
  * - visualization: Sales → 3D Visualization → Accounts
  */
-export type WorkflowType = 'marking' | 'mapping' | 'drawing' | 'visualization' | 'survey_only' | 'survey_mapping';
+export type WorkflowType = 'marking' | 'mapping' | 'drawing' | 'visualization' | 'survey_only' | 'survey_mapping' | 'qs_boq';
 
 export interface StageRecord {
   status: StageStatus;
@@ -70,6 +70,7 @@ export interface Project {
     mapping:       StageRecord;
     drawing:       StageRecord;
     visualization: StageRecord;
+    qs_boq:        StageRecord;
     accounts:      StageRecord;
   };
   description: string;
@@ -112,10 +113,11 @@ export interface ProjectStore {
   markReachedLocation: (projectId: string) => void;
 
   // Survey completions (workflow-aware)
-  completeSurvey: (projectId: string) => void;
+  completeSurvey: (projectId: string, mappingRequired: boolean) => void;
   completeMapping: (projectId: string) => void;
   completeDrawing: (projectId: string) => void;
   completeVisualization: (projectId: string) => void;
+  completeQsBoq: (projectId: string) => void;
   completeAccounts: (projectId: string) => void;
 
   // Cancel / reschedule / revert / delete

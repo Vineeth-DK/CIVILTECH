@@ -73,6 +73,15 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
     icon: 'DollarSign',
     stage: 'accounts',
   },
+  qs_boq: {
+    role: 'qs_boq',
+    label: 'QS + BOQ',
+    description: 'Quantity Surveying and Bill of Quantities',
+    color: 'text-fuchsia-400',
+    gradient: 'from-fuchsia-600 to-purple-600',
+    icon: 'Calculator',
+    stage: 'qs_boq',
+  },
 };
 
 export const PIPELINE_STAGES: PipelineStage[] = [
@@ -81,6 +90,7 @@ export const PIPELINE_STAGES: PipelineStage[] = [
   'mapping',
   'drawing',
   'visualization',
+  'qs_boq',
   'accounts',
 ];
 
@@ -90,6 +100,7 @@ export const STAGE_LABELS: Record<PipelineStage, string> = {
   mapping:       'Mapping',
   drawing:       'Drawing',
   visualization: '3D Visualization',
+  qs_boq:        'QS + BOQ',
   accounts:      'Accounts',
 };
 
@@ -100,5 +111,6 @@ export const USER_NAMES: Record<Role, string> = {
   mapping:       'Sneha Patel',
   drawing:       'Anil Desai',
   visualization: 'Meena Krishnan',
+  qs_boq:        'Ramesh Rao',
   accounts:      'Kavitha Nair',
 };

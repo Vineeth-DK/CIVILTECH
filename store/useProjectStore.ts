@@ -26,6 +26,7 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
         mapping:       pending,
         drawing:       bypassed(),
         visualization: bypassed(),
+        qs_boq:        bypassed(),
         accounts:      pending,
       };
 
@@ -38,6 +39,7 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
         mapping:       pending,
         drawing:       bypassed(),
         visualization: bypassed(),
+        qs_boq:        bypassed(),
         accounts:      pending,
       };
 
@@ -49,6 +51,7 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
         mapping:       bypassed(),
         drawing:       bypassed(),
         visualization: bypassed(),
+        qs_boq:        bypassed(),
         accounts:      pending,
       };
 
@@ -60,6 +63,7 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
         mapping:       bypassed(),
         drawing:       pending,
         visualization: bypassed(),
+        qs_boq:        bypassed(),
         accounts:      pending,
       };
 
@@ -71,6 +75,18 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
         mapping:       bypassed(),
         drawing:       bypassed(),
         visualization: pending,
+        qs_boq:        bypassed(),
+        accounts:      pending,
+      };
+
+    case 'qs_boq':
+      return {
+        sales,
+        survey:        bypassed(),
+        mapping:       bypassed(),
+        drawing:       bypassed(),
+        visualization: bypassed(),
+        qs_boq:        pending,
         accounts:      pending,
       };
   }
@@ -174,7 +190,7 @@ export const useProjectStore = create<ProjectStore>()(
               };
             }
 
-            if (wf === 'mapping') {
+            if (wf === 'mapping' || wf === 'survey_mapping' || wf === 'survey_only') {
               return {
                 ...base,
                 currentStage: 'survey' as PipelineStage,
@@ -195,6 +211,14 @@ export const useProjectStore = create<ProjectStore>()(
                 ...base,
                 currentStage: 'visualization' as PipelineStage,
                 stages: { ...base.stages, visualization: { ...p.stages.visualization, status: 'in_progress' as StageStatus } },
+              };
+            }
+
+            if (wf === 'qs_boq') {
+              return {
+                ...base,
+                currentStage: 'qs_boq' as PipelineStage,
+                stages: { ...base.stages, qs_boq: { ...p.stages.qs_boq, status: 'in_progress' as StageStatus } },
               };
             }
 
@@ -220,31 +244,36 @@ export const useProjectStore = create<ProjectStore>()(
 
       // ── completeSurvey — workflow-aware ────────────────────────────────────
 
-      completeSurvey: (projectId: string) => {
+      completeSurvey: (projectId: string, mappingRequired: boolean) => {
         set((state) => ({
           projects: state.projects.map((p) => {
             if (p.id !== projectId) return p;
             const updatedSurvey = { ...p.stages.survey, status: 'completed' as StageStatus, completedAt: now(), notes: 'Survey complete.' };
-            const wf = p.workflowType;
 
-            if (wf === 'marking') {
-              // Both survey and mapping must complete before → accounts
-              const mappingDone = p.stages.mapping.status === 'completed';
-              if (mappingDone) {
-                return { ...p, currentStage: 'accounts' as PipelineStage, updatedAt: now(),
-                  stages: { ...p.stages, survey: updatedSurvey, accounts: { ...p.stages.accounts, status: 'in_progress' as StageStatus } } };
-              }
-              // Mapping still in progress — wait
-              return { ...p, updatedAt: now(), stages: { ...p.stages, survey: updatedSurvey } };
+            if (mappingRequired) {
+              return {
+                ...p,
+                currentStage: 'mapping' as PipelineStage,
+                updatedAt: now(),
+                stages: {
+                  ...p.stages,
+                  survey: updatedSurvey,
+                  mapping: { ...p.stages.mapping, status: 'in_progress' as StageStatus, scheduledDate: p.scheduledDate },
+                },
+              };
+            } else {
+              return {
+                ...p,
+                currentStage: 'accounts' as PipelineStage,
+                updatedAt: now(),
+                stages: {
+                  ...p.stages,
+                  survey: updatedSurvey,
+                  mapping: { ...p.stages.mapping, status: 'bypassed' as StageStatus, completedAt: now() },
+                  accounts: { ...p.stages.accounts, status: 'in_progress' as StageStatus },
+                },
+              };
             }
-
-            if (wf === 'mapping') {
-              // mapping workflow: survey → mapping
-              return { ...p, currentStage: 'mapping' as PipelineStage, updatedAt: now(),
-                stages: { ...p.stages, survey: updatedSurvey, mapping: { ...p.stages.mapping, status: 'in_progress' as StageStatus, scheduledDate: p.scheduledDate } } };
-            }
-
-            return { ...p, updatedAt: now(), stages: { ...p.stages, survey: updatedSurvey } };
           }),
         }));
       },
@@ -298,6 +327,18 @@ export const useProjectStore = create<ProjectStore>()(
               stages: { ...p.stages,
                 visualization: { ...p.stages.visualization, status: 'completed' as StageStatus, completedAt: now(), notes: '3D models delivered.' },
                 accounts:      { ...p.stages.accounts,      status: 'in_progress' as StageStatus } } };
+          }),
+        }));
+      },
+
+      completeQsBoq: (projectId: string) => {
+        set((state) => ({
+          projects: state.projects.map((p) => {
+            if (p.id !== projectId) return p;
+            return { ...p, currentStage: 'accounts' as PipelineStage, updatedAt: now(),
+              stages: { ...p.stages,
+                qs_boq:   { ...p.stages.qs_boq,   status: 'completed' as StageStatus, completedAt: now(), notes: 'QS/BOQ finalised.' },
+                accounts: { ...p.stages.accounts, status: 'in_progress' as StageStatus } } };
           }),
         }));
       },

@@ -27,21 +27,14 @@ export default function AccountsPage() {
     [projects, searchQuery, dateFilter],
   );
 
-  const stats = [
-    { label: 'Total Received',  value: allTouched.length, icon: <DollarSign className="w-5 h-5 text-sky-500 dark:text-sky-400" />, color: 'bg-sky-500/10' },
-    { label: 'Pending Invoice', value: pending,            icon: <Clock className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />, color: 'bg-indigo-500/10' },
-    { label: 'Showing',         value: displayed.length,   icon: <BarChart2 className="w-5 h-5 text-slate-400 dark:text-slate-500" />, color: 'bg-slate-500/10' },
-  ];
-
   return (
     <div className="flex flex-col h-full">
       <Topbar title="Accounts" subtitle="Billing, invoicing & project closure — sorted by deadline" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
-        <StatsRow stats={stats} />
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-slate-900 dark:text-white text-sm">
-              Pending Invoices <span className="ml-2 text-xs font-normal text-slate-400 dark:text-slate-500">{displayed.length} result{displayed.length !== 1 ? 's' : ''}</span>
+              Pending Invoices
             </h2>
           </div>
           {displayed.length === 0 ? <EmptyState /> : (

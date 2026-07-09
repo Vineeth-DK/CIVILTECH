@@ -26,21 +26,14 @@ export default function MappingPage() {
     [projects, searchQuery, dateFilter],
   );
 
-  const stats = [
-    { label: 'Total Received', value: allTouched.length, icon: <Layers className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />, color: 'bg-emerald-500/10' },
-    { label: 'Pending',        value: pending,            icon: <Activity className="w-5 h-5 text-teal-500 dark:text-teal-400" />, color: 'bg-teal-500/10' },
-    { label: 'Showing',        value: displayed.length,   icon: <BarChart2 className="w-5 h-5 text-slate-400 dark:text-slate-500" />, color: 'bg-slate-500/10' },
-  ];
-
   return (
     <div className="flex flex-col h-full">
       <Topbar title="Mapping" subtitle="Topographic & site mapping — sorted by scheduled date" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
-        <StatsRow stats={stats} />
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-slate-900 dark:text-white text-sm">
-              Pending Tasks <span className="ml-2 text-xs font-normal text-slate-400 dark:text-slate-500">{displayed.length} result{displayed.length !== 1 ? 's' : ''}</span>
+              Pending Tasks
             </h2>
           </div>
           {displayed.length === 0

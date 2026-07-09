@@ -8,17 +8,18 @@ import { NewLead, WorkflowType } from '@/types';
 import { PlusCircle, Building2, Phone, MapPin, Calendar, Layers, IndianRupee, Info, GitBranch } from 'lucide-react';
 
 const PREDEFINED_TYPES = [
-  'Road Construction', 'Bridge Engineering', 'Drainage System', 'Structural Audit',
-  'Land Survey', 'Residential Layout', 'Commercial Development', 'Water Treatment',
-  'Highway Expansion', 'Flyover Design', 'Boundary Survey',
+  'Boundary Survey', 'Topography Survey', 'Land Subdivision', 'DGPS Survey',
+  'Total Station Survey', 'Drone Survey', 'Layout Marking', 'Total Station Marking',
+  'Boundary Marking', 'Legal Documentation', 'Asbuilt Survey', 'Building Plan', '3D Elevations',
 ];
 
 const WORKFLOW_OPTIONS: { value: WorkflowType; label: string; description: string }[] = [
   { value: 'survey_only',   label: '🗺️ Survey (No Mapping)', description: 'Survey → Accounts' },
   { value: 'survey_mapping',label: '🗺️ Survey + Mapping',   description: 'Survey → Mapping → Accounts' },
-  { value: 'marking',       label: '📍 Marking',          description: 'Survey + Mapping notified simultaneously → Accounts' },
+  { value: 'marking',       label: '📍 Survey + Marking',    description: 'Survey + Mapping notified simultaneously → Accounts' },
   { value: 'drawing',       label: '✏️ Drawing',          description: 'Technical drawings / CAD → Accounts' },
   { value: 'visualization', label: '🏗️ 3D Visualization', description: '3D models & renders → Accounts' },
+  { value: 'qs_boq',        label: '📊 QS + BOQ',         description: 'QS + BOQ → Accounts' },
 ];
 
 // Shared select class (dark mode compatible)
@@ -168,8 +169,8 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
               <input type="datetime-local"
-                min={new Date().toISOString().slice(0, 16)}
-                value={form.scheduledDate ? form.scheduledDate.slice(0, 16) : ''}
+                min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                value={form.scheduledDate ? new Date(new Date(form.scheduledDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
                 onChange={(e) => setField('scheduledDate', e.target.value ? new Date(e.target.value).toISOString() : '')}
                 className={`w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all`} />
             </div>
@@ -185,8 +186,8 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
               <input type="date"
-                min={new Date().toISOString().split('T')[0]}
-                value={form.deadline?.split('T')[0] ?? ''}
+                min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}
+                value={form.deadline ? new Date(new Date(form.deadline).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] : ''}
                 onChange={(e) => setField('deadline', e.target.value ? new Date(e.target.value).toISOString() : '')}
                 className="w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
             </div>

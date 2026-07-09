@@ -47,27 +47,16 @@ export default function SalesPage() {
 
   const allCancelled = [...cancelledProjects, ...cancelledDownstream];
 
-  const stats = [
-    { label: 'Total Leads', value: allTouched.length,   icon: <TrendingUp className="w-5 h-5 text-blue-500 dark:text-blue-400" />, color: 'bg-blue-500/10' },
-    { label: 'Pending',     value: pending,              icon: <Activity className="w-5 h-5 text-amber-500 dark:text-amber-400" />, color: 'bg-amber-500/10' },
-    { label: 'Cancelled',   value: allCancelled.length,  icon: <XCircle className="w-5 h-5 text-red-500 dark:text-red-400" />, color: 'bg-red-500/10' },
-    { label: 'Showing',     value: displayed.length,     icon: <BarChart2 className="w-5 h-5 text-slate-400 dark:text-slate-500" />, color: 'bg-slate-500/10' },
-  ];
-
   return (
     <div className="flex flex-col h-full">
       <Topbar title="Sales" subtitle="Lead management & confirmation" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
-        <StatsRow stats={stats} />
 
         {/* ── Pending Leads ───────────────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-slate-900 dark:text-white text-sm">
               Pending Leads
-              <span className="ml-2 text-xs font-normal text-slate-400 dark:text-slate-500">
-                {displayed.length} result{displayed.length !== 1 ? 's' : ''}
-              </span>
             </h2>
             <button onClick={() => setIsAddOpen(true)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all hover:-translate-y-0.5">

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import {
   TrendingUp, Map, Layers, PenTool, DollarSign, ShieldCheck,
   ChevronLeft, ChevronRight, LogOut, Box,
-  SlidersHorizontal, Clock, LayoutGrid, BarChart2, XCircle,
+  SlidersHorizontal, Clock, LayoutGrid, BarChart2, XCircle, Calculator,
 } from 'lucide-react';
 import { useProjectStore } from '@/store/useProjectStore';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,7 @@ const NAV_ITEMS = [
   { role: 'mapping'       as Role, href: '/mapping',       icon: Layers,      label: 'Mapping',           active: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
   { role: 'drawing'       as Role, href: '/drawing',       icon: PenTool,     label: 'Drawing',           active: 'text-pink-600 dark:text-pink-400 bg-pink-500/10 border-pink-500/20' },
   { role: 'visualization' as Role, href: '/visualization', icon: Box,         label: '3D Visualization',  active: 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20' },
+  { role: 'qs_boq'        as Role, href: '/qs_boq',        icon: Calculator,  label: 'QS + BOQ',          active: 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/20' },
   { role: 'accounts'      as Role, href: '/accounts',      icon: DollarSign,  label: 'Accounts',          active: 'text-sky-600 dark:text-sky-400 bg-sky-500/10 border-sky-500/20' },
 ];
 
@@ -41,6 +42,7 @@ const ROLE_FILTERS: Record<Role, { id: StatusFilter; label: string; icon: React.
   mapping:       [{ id: 'in_progress', label: 'Pending Tasks',    icon: Clock }],
   drawing:       [{ id: 'in_progress', label: 'Pending Tasks',    icon: Clock }],
   visualization: [{ id: 'in_progress', label: 'Pending Tasks',    icon: Clock }],
+  qs_boq:        [{ id: 'in_progress', label: 'Pending Tasks',    icon: Clock }],
   accounts:      [{ id: 'in_progress', label: 'Pending Invoices', icon: Clock }],
 };
 
@@ -76,8 +78,7 @@ export function Sidebar() {
         {!collapsed && (
           <>
             <div className="relative flex-shrink-0 transition-all duration-200 w-32 h-10">
-              <Image src="/logo.png" alt="CivilTech" fill sizes="128px" className="object-contain dark:hidden" priority />
-              <Image src="/logo-white.png" alt="CivilTech" fill sizes="128px" className="object-contain hidden dark:block" priority />
+              <Image src="/logo.png" alt="CivilTech" fill sizes="128px" className="object-contain" priority />
             </div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="min-w-0 flex-1">
               <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">Workflow Platform</p>

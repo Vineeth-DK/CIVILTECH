@@ -105,8 +105,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-10 mt-4">
           <div className="relative w-full h-32 max-w-[400px] mx-auto drop-shadow-sm dark:drop-shadow-none">
-            <Image src="/logo.png" alt="CivilTech Logo" fill className="object-contain dark:hidden" priority />
-            <Image src="/logo-white.png" alt="CivilTech Logo" fill className="object-contain hidden dark:block" priority />
+            <Image src="/logo.png" alt="CivilTech Logo" fill className="object-contain" priority />
           </div>
         </div>
 

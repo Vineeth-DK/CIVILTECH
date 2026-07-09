@@ -139,16 +139,14 @@ export function SurveyActionModal({ project, isOpen, onClose }: {
   project: Project | null; isOpen: boolean; onClose: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [mappingRequired, setMappingRequired] = useState(true);
   const { completeSurvey } = useProjectStore();
-
-  const wf = project?.workflowType;
-  const nextLabel = wf === 'marking' ? 'waits for Mapping, then → Accounts' : 'routes to Mapping';
 
   const handleConfirm = async () => {
     if (!project) return;
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    completeSurvey(project.id);
+    completeSurvey(project.id, mappingRequired);
     setIsLoading(false);
     onClose();
   };
@@ -158,8 +156,25 @@ export function SurveyActionModal({ project, isOpen, onClose }: {
       <div className="space-y-4">
         <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
           <p className="text-xs font-semibold text-amber-600 dark:text-amber-300 mb-0.5">Step 2 of 2 — Mark Complete</p>
-          <p className="text-xs text-amber-700 dark:text-amber-400">Survey complete. Project {nextLabel}.</p>
+          <p className="text-xs text-amber-700 dark:text-amber-400">Survey complete.</p>
         </div>
+        
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Is Mapping Required?</label>
+          <div className="flex gap-3">
+            <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
+                   style={mappingRequired ? { borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)' } : {}}>
+              <input type="radio" checked={mappingRequired} onChange={() => setMappingRequired(true)} className="hidden" />
+              <span className={`text-sm font-medium ${mappingRequired ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>Yes, send to Mapping</span>
+            </label>
+            <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
+                   style={!mappingRequired ? { borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)' } : {}}>
+              <input type="radio" checked={!mappingRequired} onChange={() => setMappingRequired(false)} className="hidden" />
+              <span className={`text-sm font-medium ${!mappingRequired ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`}>No, bypass to Accounts</span>
+            </label>
+          </div>
+        </div>
+
         <div className="flex gap-3 pt-1">
           <Button variant="secondary" size="md" className="flex-1" onClick={onClose}>Cancel</Button>
           <Button variant="success" size="md" className="flex-1" isLoading={isLoading} icon={<CheckCircle className="w-4 h-4" />} onClick={handleConfirm}>Complete Survey</Button>
@@ -176,7 +191,7 @@ export function GenericActionModal({ project, isOpen, onClose, title, descriptio
   title: string; description: string; actionLabel: string;
   onConfirm: (projectId: string) => void;
   variant?: 'primary' | 'success' | 'danger';
-  accentColor?: 'blue' | 'emerald' | 'pink' | 'sky' | 'indigo';
+  accentColor?: 'blue' | 'emerald' | 'pink' | 'sky' | 'indigo' | 'fuchsia';
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -195,6 +210,7 @@ export function GenericActionModal({ project, isOpen, onClose, title, descriptio
     pink:   'bg-pink-50 dark:bg-pink-500/10 border-pink-200 dark:border-pink-500/20 text-pink-700 dark:text-pink-300',
     sky:    'bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/20 text-sky-700 dark:text-sky-300',
     indigo: 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300',
+    fuchsia:'bg-fuchsia-50 dark:bg-fuchsia-500/10 border-fuchsia-200 dark:border-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300',
   };
 
   return (
@@ -382,6 +398,7 @@ export function AdminCancelReviewModal({ project, stage, isOpen, onClose }: {
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">New Scheduled Date</label>
                 <input type="datetime-local" value={newDate} onChange={(e) => setNewDate(e.target.value)}
+                  min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                   className="w-full h-10 px-3 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
               </div>
             )}
@@ -438,7 +455,7 @@ export function RescheduleModal({ project, stage, isOpen, onClose }: {
           <div className="relative">
             <CalendarClock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
             <input type={isFieldStage ? 'datetime-local' : 'date'} value={newDate} onChange={(e) => setNewDate(e.target.value)}
-              min={isFieldStage ? new Date().toISOString().slice(0, 16) : new Date().toISOString().split('T')[0]}
+              min={isFieldStage ? new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}
               className="w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
           </div>
         </div>

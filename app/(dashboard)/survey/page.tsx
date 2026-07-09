@@ -30,12 +30,6 @@ export default function SurveyPage() {
     [projects, searchQuery, dateFilter],
   );
 
-  const stats = [
-    { label: 'Total Received', value: allTouched.length, icon: <Map className="w-5 h-5 text-amber-500 dark:text-amber-400" />, color: 'bg-amber-500/10' },
-    { label: 'Pending',        value: pending,            icon: <Activity className="w-5 h-5 text-orange-500 dark:text-orange-400" />, color: 'bg-orange-500/10' },
-    { label: 'Showing',        value: displayed.length,   icon: <BarChart2 className="w-5 h-5 text-slate-400 dark:text-slate-500" />, color: 'bg-slate-500/10' },
-  ];
-
   const handleSurveyAction = (project: Project) => {
     if (!project.stages.survey.reachedAt) {
       setReachProject(project); setIsReachOpen(true);
@@ -53,11 +47,10 @@ export default function SurveyPage() {
     <div className="flex flex-col h-full">
       <Topbar title="Survey" subtitle="Field survey assignments — sorted by scheduled date" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
-        <StatsRow stats={stats} />
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-slate-900 dark:text-white text-sm">
-              Pending Surveys <span className="ml-2 text-xs font-normal text-slate-400 dark:text-slate-500">{displayed.length} result{displayed.length !== 1 ? 's' : ''}</span>
+              Pending Surveys
             </h2>
           </div>
           {displayed.length === 0

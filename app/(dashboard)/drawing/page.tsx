@@ -26,21 +26,14 @@ export default function DrawingPage() {
     [projects, searchQuery, dateFilter],
   );
 
-  const stats = [
-    { label: 'Total Received', value: allTouched.length,  icon: <PenTool className="w-5 h-5 text-pink-500 dark:text-pink-400" />, color: 'bg-pink-500/10' },
-    { label: 'Pending',        value: pending,             icon: <Activity className="w-5 h-5 text-rose-500 dark:text-rose-400" />, color: 'bg-rose-500/10' },
-    { label: 'Showing',        value: displayed.length,    icon: <BarChart2 className="w-5 h-5 text-slate-400 dark:text-slate-500" />, color: 'bg-slate-500/10' },
-  ];
-
   return (
     <div className="flex flex-col h-full">
       <Topbar title="Drawing" subtitle="Technical drawings & CAD plans — sorted by deadline" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
-        <StatsRow stats={stats} />
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-slate-900 dark:text-white text-sm">
-              Pending Tasks <span className="ml-2 text-xs font-normal text-slate-400 dark:text-slate-500">{displayed.length} result{displayed.length !== 1 ? 's' : ''}</span>
+              Pending Tasks
             </h2>
           </div>
           {displayed.length === 0
