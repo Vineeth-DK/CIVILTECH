@@ -61,11 +61,12 @@ export function ProjectTimeline({ project }: ProjectTimelineProps) {
     <div className="flex items-center gap-0 w-full overflow-x-auto py-2">
       {stageConfig.map((stage, i) => {
         const record = project.stages[stage.key];
-        const { node, icon } = getNodeStyle(record.status, stage.color);
+        const status = record?.status ?? 'bypassed';
+        const { node, icon } = getNodeStyle(status, stage.color);
         const c = colorMap[stage.color];
         const isLast = i === stageConfig.length - 1;
         const nextStage = stageConfig[i + 1];
-        const nextStatus = nextStage ? project.stages[nextStage.key].status : null;
+        const nextStatus = nextStage ? (project.stages[nextStage.key]?.status ?? 'bypassed') : null;
 
         return (
           <div key={stage.key} className="flex items-center flex-shrink-0">
@@ -76,7 +77,7 @@ export function ProjectTimeline({ project }: ProjectTimelineProps) {
                 animate={{ scale: 1 }}
                 transition={{ delay: i * 0.08, type: 'spring' }}
                 className={cn(node, 'relative group cursor-default')}
-                title={`${stage.label}: ${record.status}`}
+                title={`${stage.label}: ${status}`}
               >
                 {icon}
 

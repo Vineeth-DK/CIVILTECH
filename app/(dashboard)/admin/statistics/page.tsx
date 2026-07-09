@@ -51,10 +51,13 @@ export default function AdminStatisticsPage() {
 
   // Dept stats
   const deptStats = DEPT_META.map(({ stage, label, icon, color, bg }) => {
-    const touched   = filtered.filter((p) => p.stages[stage].status !== 'pending' && p.stages[stage].status !== 'bypassed');
-    const doneCount = touched.filter((p) => p.stages[stage].status === 'completed').length;
-    const inProgress = touched.filter((p) => p.stages[stage].status === 'in_progress').length;
-    const cancelledD = touched.filter((p) => p.stages[stage].status === 'cancelled' || p.stages[stage].status === 'cancellation_requested').length;
+    const touched   = filtered.filter((p) => {
+      const s = p.stages[stage]?.status ?? 'bypassed';
+      return s !== 'pending' && s !== 'bypassed';
+    });
+    const doneCount = touched.filter((p) => p.stages[stage]?.status === 'completed').length;
+    const inProgress = touched.filter((p) => p.stages[stage]?.status === 'in_progress').length;
+    const cancelledD = touched.filter((p) => p.stages[stage]?.status === 'cancelled' || p.stages[stage]?.status === 'cancellation_requested').length;
     const rate = touched.length > 0 ? Math.round((doneCount / touched.length) * 100) : 0;
     return { stage, label, icon, color, bg, total: touched.length, done: doneCount, inProgress, cancelled: cancelledD, rate };
   });

@@ -22,7 +22,7 @@ export default function AdminCancelledPage() {
   // Pending cancellation requests (need admin action)
   const pendingRequests = useMemo(() =>
     sortByNearestDate(allProjects.filter((p) =>
-      DEPT_STAGES.some((s) => p.stages[s].status === 'cancellation_requested')
+      DEPT_STAGES.some((s) => p.stages[s]?.status === 'cancellation_requested')
     )),
     [allProjects]
   );
@@ -30,8 +30,8 @@ export default function AdminCancelledPage() {
   // Already cancelled projects
   const cancelledProjects = useMemo(() =>
     sortByNearestDate(allProjects.filter((p) =>
-      DEPT_STAGES.some((s) => p.stages[s].status === 'cancelled') &&
-      !DEPT_STAGES.some((s) => p.stages[s].status === 'cancellation_requested')
+      DEPT_STAGES.some((s) => p.stages[s]?.status === 'cancelled') &&
+      !DEPT_STAGES.some((s) => p.stages[s]?.status === 'cancellation_requested')
     )),
     [allProjects]
   );
@@ -70,7 +70,7 @@ export default function AdminCancelledPage() {
                 <EmptyState icon={<AlertTriangle />} message="No pending requests" sub="All cancellation requests have been handled." />
               ) : (
                 pendingRequests.map((project, i) => {
-                  const reqStage = DEPT_STAGES.find((s) => project.stages[s].status === 'cancellation_requested')!;
+                  const reqStage = DEPT_STAGES.find((s) => project.stages[s]?.status === 'cancellation_requested')!;
                   return <CancelRequestCard key={project.id} project={project} stage={reqStage} index={i} />;
                 })
               )}
@@ -85,7 +85,7 @@ export default function AdminCancelledPage() {
                 <EmptyState icon={<XCircle />} message="No cancelled projects" sub="Approved cancellations will appear here." />
               ) : (
                 cancelledProjects.map((project, i) => {
-                  const cancelStage = DEPT_STAGES.find((s) => project.stages[s].status === 'cancelled')!;
+                  const cancelStage = DEPT_STAGES.find((s) => project.stages[s]?.status === 'cancelled')!;
                   return <CancelledProjectCard key={project.id} project={project} stage={cancelStage} index={i} />;
                 })
               )}

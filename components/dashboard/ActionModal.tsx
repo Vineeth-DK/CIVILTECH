@@ -442,7 +442,7 @@ export function RescheduleModal({ project, stage, isOpen, onClose }: {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Reschedule Project" description={project?.name ?? ''}>
       <div className="space-y-4">
-        {project?.stages[stage].cancelReason && (
+        {project?.stages?.[stage]?.cancelReason && (
           <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/4 border border-slate-200 dark:border-white/8 text-xs text-slate-600 dark:text-slate-400">
             <p className="font-semibold mb-0.5">Previous reason:</p>
             <p>{project.stages[stage].cancelReason}</p>

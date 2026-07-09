@@ -111,7 +111,7 @@ export function applyFilters(
 ): Project[] {
   // 1. Only projects where this department has been reached
   let result = projects.filter((p) => {
-    const s = p.stages[stage].status;
+    const s = p.stages[stage]?.status ?? 'bypassed';
     if (s === 'pending') return false;
     if (excludeBypassed && s === 'bypassed') return false;
     if (onlyPending && s === 'completed') return false;  // hide completed from non-admin
@@ -122,7 +122,7 @@ export function applyFilters(
 
   // 2. Status filter
   if (statusFilter !== 'all') {
-    result = result.filter((p) => p.stages[stage].status === statusFilter);
+    result = result.filter((p) => (p.stages[stage]?.status ?? 'bypassed') === statusFilter);
   }
 
   // 3. Full-text search (name, client, id, location, phone)

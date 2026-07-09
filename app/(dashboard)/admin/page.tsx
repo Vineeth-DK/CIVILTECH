@@ -95,7 +95,7 @@ export default function AdminPage() {
             {DEPT_SECTIONS.map(({ stage, label, icon: Icon, color }) => {
               const deptProjects = sortByNearestDate(
                 filteredProjects.filter((p) =>
-                  p.stages[stage].status === 'in_progress' || p.stages[stage].status === 'cancellation_requested'
+                  p.stages?.[stage]?.status === 'in_progress' || p.stages?.[stage]?.status === 'cancellation_requested'
                 )
               );
               if (deptProjects.length === 0) return null;
@@ -144,8 +144,8 @@ export default function AdminPage() {
 function DeptSection({ stage, label, color, Icon, projects }: {
   stage: PipelineStage; label: string; color: string; Icon: React.FC<{className?: string}>; projects: Project[];
 }) {
-  const pending    = projects.filter((p) => p.stages[stage].status === 'in_progress');
-  const requested  = projects.filter((p) => p.stages[stage].status === 'cancellation_requested');
+  const pending    = projects.filter((p) => p.stages[stage]?.status === 'in_progress');
+  const requested  = projects.filter((p) => p.stages[stage]?.status === 'cancellation_requested');
 
   return (
     <div className="glass rounded-2xl overflow-hidden">

@@ -52,11 +52,11 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
 
   const showValue    = VALUE_VISIBLE_ROLES.includes(role) && project.value > 0;
   const isFieldStage = FIELD_STAGES.includes(stage);
-  const isCancelled           = stageRecord.status === 'cancelled';
-  const isCancelRequested      = stageRecord.status === 'cancellation_requested';
+  const isCancelled           = stageRecord?.status === 'cancelled';
+  const isCancelRequested      = stageRecord?.status === 'cancellation_requested';
 
   const resolvedLabel = typeof actionLabel === 'function' ? actionLabel(project) : actionLabel;
-  const canAct = onAction && resolvedLabel && stageRecord.status === 'in_progress';
+  const canAct = onAction && resolvedLabel && stageRecord?.status === 'in_progress';
 
   const STAGES: PipelineStage[] = ['sales', 'survey', 'mapping', 'drawing', 'visualization', 'accounts'];
   const currentIndex = STAGES.indexOf(stage);

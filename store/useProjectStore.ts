@@ -421,7 +421,7 @@ export const useProjectStore = create<ProjectStore>()(
             
             // Find the most recent stage before this one that is 'completed'
             for (let i = currentIndex - 1; i >= 0; i--) {
-              if (p.stages[STAGES[i]].status === 'completed') {
+              if (p.stages[STAGES[i]]?.status === 'completed') {
                 prevStage = STAGES[i];
                 break;
               }
@@ -479,9 +479,9 @@ export const useProjectStore = create<ProjectStore>()(
       getProjectsByStage: (stage: PipelineStage) => get().projects.filter((p) => p.currentStage === stage),
 
       getProjectsByDeptStatus: (stage: PipelineStage, filter: 'all' | StageStatus) => {
-        const touched = get().projects.filter((p) => p.stages[stage].status !== 'pending' && p.stages[stage].status !== 'bypassed');
+        const touched = get().projects.filter((p) => p.stages[stage]?.status !== 'pending' && p.stages[stage]?.status !== 'bypassed');
         if (filter === 'all') return touched;
-        return touched.filter((p) => p.stages[stage].status === filter);
+        return touched.filter((p) => p.stages[stage]?.status === filter);
       },
 
       getAllProjects: () => get().projects,

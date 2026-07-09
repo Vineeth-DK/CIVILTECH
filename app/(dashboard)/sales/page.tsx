@@ -88,7 +88,7 @@ export default function SalesPage() {
               <AnimatePresence mode="popLayout">
                 {allCancelled.map((project, i) => {
                   const cancelledStage = (['survey','mapping','drawing','visualization','accounts'] as const)
-                    .find((s) => project.stages[s].status === 'cancelled') ?? 'sales';
+                    .find((s) => project.stages[s]?.status === 'cancelled') ?? 'sales';
                   return (
                     <ProjectCard key={project.id} project={project} stage={cancelledStage}
                       showReschedule index={i} />
