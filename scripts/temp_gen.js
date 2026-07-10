@@ -20,6 +20,7 @@ for(let i=0; i<offsets.length; i++) {
   const daysAgo = offsets[i];
   const dateStr = generateDate(daysAgo);
   const wf = workflows[i % workflows.length];
+  const stateType = i % 3; // 0: Sales, 1: Active Dept, 2: Accounts/Done
   
   let currentStage = 'sales';
   let stages = {
@@ -37,143 +38,54 @@ for(let i=0; i<offsets.length; i++) {
   const pend = () => ({ status: 'pending' });
   const bp = () => ({ status: 'bypassed', completedAt: '2026-01-01T00:00:00Z' });
 
+  // Baseline workflow setup
   if (wf === 'survey') {
-    stages = {
-      sales: comp('Priya Sharma'),
-      survey: pend(),
-      mapping: pend(),
-      drawing: bp(),
-      visualization: bp(),
-      qs_boq: bp(),
-      accounts: pend()
-    };
-    if (daysAgo > 60) {
-      currentStage = 'accounts';
-      stages.survey = comp('Ravi Kumar');
-      stages.mapping = comp('Sneha Patel');
-      stages.accounts = comp('Kavitha Nair');
-    } else if (daysAgo > 30) {
-      currentStage = 'accounts';
-      stages.survey = comp('Ravi Kumar');
-      stages.mapping = comp('Sneha Patel');
-      stages.accounts = inProg('Kavitha Nair');
-    } else if (daysAgo > 14) {
-      currentStage = 'mapping';
-      stages.survey = comp('Ravi Kumar');
-      stages.mapping = inProg('Sneha Patel');
-    } else if (daysAgo > 7) {
-      currentStage = 'survey';
-      stages.survey = inProg('Ravi Kumar');
-    } else {
-      currentStage = 'sales';
-      stages.sales = inProg('Priya Sharma');
-    }
+    stages = { sales: pend(), survey: pend(), mapping: pend(), drawing: bp(), visualization: bp(), qs_boq: bp(), accounts: pend() };
   } else if (wf === 'marking') {
-    stages = {
-      sales: comp('Priya Sharma'),
-      survey: pend(),
-      mapping: pend(),
-      drawing: bp(),
-      visualization: bp(),
-      qs_boq: bp(),
-      accounts: pend()
-    };
-    if (daysAgo > 60) {
-      currentStage = 'accounts';
-      stages.survey = comp('Ravi Kumar');
-      stages.mapping = comp('Sneha Patel');
-      stages.accounts = comp('Kavitha Nair');
-    } else if (daysAgo > 30) {
-      currentStage = 'accounts';
-      stages.survey = comp('Ravi Kumar');
-      stages.mapping = comp('Sneha Patel');
-      stages.accounts = inProg('Kavitha Nair');
-    } else if (daysAgo > 14) {
-      currentStage = 'survey';
-      stages.survey = inProg('Ravi Kumar');
-      stages.mapping = comp('Sneha Patel');
-    } else if (daysAgo > 7) {
-      currentStage = 'survey';
-      stages.survey = inProg('Ravi Kumar');
-      stages.mapping = inProg('Sneha Patel');
-    } else {
-      currentStage = 'sales';
-      stages.sales = inProg('Priya Sharma');
-    }
+    stages = { sales: pend(), survey: pend(), mapping: pend(), drawing: bp(), visualization: bp(), qs_boq: bp(), accounts: pend() };
   } else if (wf === 'drawing') {
-    stages = {
-      sales: comp('Priya Sharma'),
-      survey: bp(),
-      mapping: bp(),
-      drawing: pend(),
-      visualization: bp(),
-      qs_boq: bp(),
-      accounts: pend()
-    };
-    if (daysAgo > 60) {
-      currentStage = 'accounts';
-      stages.drawing = comp('Arjun Singh');
-      stages.accounts = comp('Kavitha Nair');
-    } else if (daysAgo > 30) {
-      currentStage = 'accounts';
-      stages.drawing = comp('Arjun Singh');
-      stages.accounts = inProg('Kavitha Nair');
-    } else if (daysAgo > 7) {
-      currentStage = 'drawing';
-      stages.drawing = inProg('Arjun Singh');
-    } else {
-      currentStage = 'sales';
-      stages.sales = inProg('Priya Sharma');
-    }
+    stages = { sales: pend(), survey: bp(), mapping: bp(), drawing: pend(), visualization: bp(), qs_boq: bp(), accounts: pend() };
   } else if (wf === 'visualization') {
-    stages = {
-      sales: comp('Priya Sharma'),
-      survey: bp(),
-      mapping: bp(),
-      drawing: bp(),
-      visualization: pend(),
-      qs_boq: bp(),
-      accounts: pend()
-    };
-    if (daysAgo > 60) {
-      currentStage = 'accounts';
-      stages.visualization = comp('Arjun Singh');
-      stages.accounts = comp('Kavitha Nair');
-    } else if (daysAgo > 30) {
-      currentStage = 'accounts';
-      stages.visualization = comp('Arjun Singh');
-      stages.accounts = inProg('Kavitha Nair');
-    } else if (daysAgo > 7) {
-      currentStage = 'visualization';
-      stages.visualization = inProg('Arjun Singh');
-    } else {
-      currentStage = 'sales';
-      stages.sales = inProg('Priya Sharma');
-    }
+    stages = { sales: pend(), survey: bp(), mapping: bp(), drawing: bp(), visualization: pend(), qs_boq: bp(), accounts: pend() };
   } else if (wf === 'qs_boq') {
-    stages = {
-      sales: comp('Priya Sharma'),
-      survey: bp(),
-      mapping: bp(),
-      drawing: bp(),
-      visualization: bp(),
-      qs_boq: pend(),
-      accounts: pend()
-    };
+    stages = { sales: pend(), survey: bp(), mapping: bp(), drawing: bp(), visualization: bp(), qs_boq: pend(), accounts: pend() };
+  }
+
+  // Apply stateType
+  if (stateType === 0) {
+    // In Sales
+    currentStage = 'sales';
+    stages.sales = inProg('Priya Sharma');
+  } else if (stateType === 1) {
+    // Active in Dept
+    stages.sales = comp('Priya Sharma');
+    if (wf === 'survey') {
+      // 50% survey, 50% mapping
+      if (i % 2 === 0) { currentStage = 'survey'; stages.survey = inProg('Ravi Kumar'); }
+      else { currentStage = 'mapping'; stages.survey = comp('Ravi Kumar'); stages.mapping = inProg('Sneha Patel'); }
+    } else if (wf === 'marking') {
+      currentStage = 'survey'; stages.survey = inProg('Ravi Kumar'); stages.mapping = inProg('Sneha Patel');
+    } else if (wf === 'drawing') {
+      currentStage = 'drawing'; stages.drawing = inProg('Arjun Singh');
+    } else if (wf === 'visualization') {
+      currentStage = 'visualization'; stages.visualization = inProg('Arjun Singh');
+    } else if (wf === 'qs_boq') {
+      currentStage = 'qs_boq'; stages.qs_boq = inProg('Neha Gupta');
+    }
+  } else if (stateType === 2) {
+    // Accounts or Done
+    stages.sales = comp('Priya Sharma');
+    if (wf === 'survey') { stages.survey = comp('Ravi Kumar'); stages.mapping = comp('Sneha Patel'); }
+    if (wf === 'marking') { stages.survey = comp('Ravi Kumar'); stages.mapping = comp('Sneha Patel'); }
+    if (wf === 'drawing') { stages.drawing = comp('Arjun Singh'); }
+    if (wf === 'visualization') { stages.visualization = comp('Arjun Singh'); }
+    if (wf === 'qs_boq') { stages.qs_boq = comp('Neha Gupta'); }
+    
+    currentStage = 'accounts';
     if (daysAgo > 60) {
-      currentStage = 'accounts';
-      stages.qs_boq = comp('Neha Gupta');
       stages.accounts = comp('Kavitha Nair');
-    } else if (daysAgo > 30) {
-      currentStage = 'accounts';
-      stages.qs_boq = comp('Neha Gupta');
-      stages.accounts = inProg('Kavitha Nair');
-    } else if (daysAgo > 7) {
-      currentStage = 'qs_boq';
-      stages.qs_boq = inProg('Neha Gupta');
     } else {
-      currentStage = 'sales';
-      stages.sales = inProg('Priya Sharma');
+      stages.accounts = inProg('Kavitha Nair');
     }
   }
 

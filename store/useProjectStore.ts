@@ -298,7 +298,7 @@ export const useProjectStore = create<ProjectStore>()(
             }
 
             // mapping workflow: mapping → accounts
-            if (wf === 'mapping') {
+            if (wf === 'mapping' || wf === 'survey') {
               return { ...p, currentStage: 'accounts' as PipelineStage, updatedAt: now(),
                 stages: { ...p.stages, mapping: updatedMapping, accounts: { ...p.stages.accounts, status: 'in_progress' as StageStatus } } };
             }
