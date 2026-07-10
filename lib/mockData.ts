@@ -1,6 +1,6 @@
-import { Project, WorkflowType, Priority } from '@/types';
+import { Project, WorkflowType, Priority, PipelineStage, StageStatus, StageRecord } from '@/types';
 
-const bp = (status: 'bypassed') => ({ status, completedAt: '2026-01-01T00:00:00Z' });
+const bp = (status: 'bypassed'): StageRecord => ({ status, completedAt: '2026-01-01T00:00:00Z' });
 
 export const MOCK_PROJECTS: Project[] = [
   {
@@ -10,23 +10,44 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99990',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'marking' as WorkflowType,
+    workflowType: 'survey' as WorkflowType,
     priority: 'medium' as Priority,
     value: 100000,
     description: 'Generated project 0',
-    createdAt: '2026-07-08T03:44:11.762Z',
-    updatedAt: '2026-07-08T03:44:11.762Z',
-    scheduledDate: '2026-07-08T03:44:11.762Z',
-    currentStage: 'accounts',
+    createdAt: '2026-07-08T03:51:16.278Z',
+    updatedAt: '2026-07-08T03:51:16.278Z',
+    scheduledDate: '2026-07-08T03:51:16.278Z',
+    currentStage: 'survey' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-07-08T03:44:11.762Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-07-08T03:44:11.762Z', assignedTo: 'Admin', scheduledDate: '2026-07-08T03:44:11.762Z' },
-      mapping: { status: 'completed', completedAt: '2026-07-08T03:44:11.762Z', assignedTo: 'Admin', scheduledDate: '2026-07-08T03:44:11.762Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-07-08T03:51:16.278Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'in_progress',
+            'assignedTo': 'Ravi Kumar',
+            'scheduledDate': '2026-07-08T03:51:16.278Z'
+      },
+      'mapping': {
+            'status': 'pending'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-101',
@@ -35,23 +56,46 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99991',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'mapping' as WorkflowType,
+    workflowType: 'marking' as WorkflowType,
     priority: 'medium' as Priority,
     value: 110000,
     description: 'Generated project 1',
-    createdAt: '2026-07-07T03:44:11.763Z',
-    updatedAt: '2026-07-07T03:44:11.763Z',
-    scheduledDate: '2026-07-07T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-07-07T03:51:16.279Z',
+    updatedAt: '2026-07-07T03:51:16.279Z',
+    scheduledDate: '2026-07-07T03:51:16.279Z',
+    currentStage: 'survey' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-07-07T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-07-07T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-07-07T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-07-07T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-07-07T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-07-07T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'in_progress',
+            'assignedTo': 'Ravi Kumar',
+            'scheduledDate': '2026-07-07T03:51:16.279Z'
+      },
+      'mapping': {
+            'status': 'in_progress',
+            'assignedTo': 'Sneha Patel',
+            'scheduledDate': '2026-07-07T03:51:16.279Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-102',
@@ -60,23 +104,45 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99992',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'survey' as WorkflowType,
+    workflowType: 'drawing' as WorkflowType,
     priority: 'medium' as Priority,
     value: 120000,
     description: 'Generated project 2',
-    createdAt: '2026-07-05T03:44:11.763Z',
-    updatedAt: '2026-07-05T03:44:11.763Z',
-    scheduledDate: '2026-07-05T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-07-05T03:51:16.279Z',
+    updatedAt: '2026-07-05T03:51:16.279Z',
+    scheduledDate: '2026-07-05T03:51:16.279Z',
+    currentStage: 'drawing' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-07-05T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-07-05T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-07-05T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-07-05T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-07-05T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-07-05T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'in_progress',
+            'assignedTo': 'Arjun Singh',
+            'scheduledDate': '2026-07-05T03:51:16.279Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-103',
@@ -85,23 +151,45 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99993',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'drawing' as WorkflowType,
+    workflowType: 'visualization' as WorkflowType,
     priority: 'medium' as Priority,
     value: 130000,
     description: 'Generated project 3',
-    createdAt: '2026-06-30T03:44:11.763Z',
-    updatedAt: '2026-06-30T03:44:11.763Z',
-    scheduledDate: '2026-06-30T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-06-30T03:51:16.279Z',
+    updatedAt: '2026-06-30T03:51:16.279Z',
+    scheduledDate: '2026-06-30T03:51:16.279Z',
+    currentStage: 'visualization' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-06-30T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-06-30T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-30T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-06-30T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-30T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-06-30T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'in_progress',
+            'assignedTo': 'Arjun Singh',
+            'scheduledDate': '2026-06-30T03:51:16.279Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-104',
@@ -110,23 +198,45 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99994',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'visualization' as WorkflowType,
+    workflowType: 'qs_boq' as WorkflowType,
     priority: 'medium' as Priority,
     value: 140000,
     description: 'Generated project 4',
-    createdAt: '2026-06-26T03:44:11.763Z',
-    updatedAt: '2026-06-26T03:44:11.763Z',
-    scheduledDate: '2026-06-26T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-06-26T03:51:16.279Z',
+    updatedAt: '2026-06-26T03:51:16.279Z',
+    scheduledDate: '2026-06-26T03:51:16.279Z',
+    currentStage: 'qs_boq' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-06-26T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-06-26T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-26T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-06-26T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-26T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-06-26T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'in_progress',
+            'assignedTo': 'Neha Gupta',
+            'scheduledDate': '2026-06-26T03:51:16.279Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-105',
@@ -135,23 +245,46 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99995',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'qs_boq' as WorkflowType,
+    workflowType: 'survey' as WorkflowType,
     priority: 'medium' as Priority,
     value: 150000,
     description: 'Generated project 5',
-    createdAt: '2026-06-22T03:44:11.763Z',
-    updatedAt: '2026-06-22T03:44:11.763Z',
-    scheduledDate: '2026-06-22T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-06-22T03:51:16.279Z',
+    updatedAt: '2026-06-22T03:51:16.279Z',
+    scheduledDate: '2026-06-22T03:51:16.279Z',
+    currentStage: 'mapping' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-06-22T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-06-22T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-22T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-06-22T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-22T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-06-22T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'completed',
+            'completedAt': '2026-06-22T03:51:16.279Z',
+            'assignedTo': 'Ravi Kumar'
+      },
+      'mapping': {
+            'status': 'in_progress',
+            'assignedTo': 'Sneha Patel',
+            'scheduledDate': '2026-06-22T03:51:16.279Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-106',
@@ -164,19 +297,42 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 160000,
     description: 'Generated project 6',
-    createdAt: '2026-06-19T03:44:11.763Z',
-    updatedAt: '2026-06-19T03:44:11.763Z',
-    scheduledDate: '2026-06-19T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-06-19T03:51:16.279Z',
+    updatedAt: '2026-06-19T03:51:16.279Z',
+    scheduledDate: '2026-06-19T03:51:16.279Z',
+    currentStage: 'survey' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-06-19T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-06-19T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-19T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-06-19T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-19T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-06-19T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'in_progress',
+            'assignedTo': 'Ravi Kumar',
+            'scheduledDate': '2026-06-19T03:51:16.279Z'
+      },
+      'mapping': {
+            'status': 'completed',
+            'completedAt': '2026-06-19T03:51:16.279Z',
+            'assignedTo': 'Sneha Patel'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-107',
@@ -185,23 +341,45 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99997',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'mapping' as WorkflowType,
+    workflowType: 'drawing' as WorkflowType,
     priority: 'medium' as Priority,
     value: 170000,
     description: 'Generated project 7',
-    createdAt: '2026-06-16T03:44:11.763Z',
-    updatedAt: '2026-06-16T03:44:11.763Z',
-    scheduledDate: '2026-06-16T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-06-16T03:51:16.279Z',
+    updatedAt: '2026-06-16T03:51:16.279Z',
+    scheduledDate: '2026-06-16T03:51:16.279Z',
+    currentStage: 'drawing' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-06-16T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-06-16T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-16T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-06-16T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-16T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-06-16T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'in_progress',
+            'assignedTo': 'Arjun Singh',
+            'scheduledDate': '2026-06-16T03:51:16.279Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-108',
@@ -210,23 +388,45 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99998',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'survey' as WorkflowType,
+    workflowType: 'visualization' as WorkflowType,
     priority: 'medium' as Priority,
     value: 180000,
     description: 'Generated project 8',
-    createdAt: '2026-06-12T03:44:11.763Z',
-    updatedAt: '2026-06-12T03:44:11.763Z',
-    scheduledDate: '2026-06-12T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-06-12T03:51:16.279Z',
+    updatedAt: '2026-06-12T03:51:16.279Z',
+    scheduledDate: '2026-06-12T03:51:16.279Z',
+    currentStage: 'visualization' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-06-12T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-06-12T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-12T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-06-12T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-06-12T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-06-12T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'in_progress',
+            'assignedTo': 'Arjun Singh',
+            'scheduledDate': '2026-06-12T03:51:16.279Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'pending'
+      }
+}
   },
   {
     id: 'PRJ-109',
@@ -235,23 +435,47 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99999',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'drawing' as WorkflowType,
+    workflowType: 'qs_boq' as WorkflowType,
     priority: 'medium' as Priority,
     value: 190000,
     description: 'Generated project 9',
-    createdAt: '2026-05-26T03:44:11.763Z',
-    updatedAt: '2026-05-26T03:44:11.763Z',
-    scheduledDate: '2026-05-26T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-05-26T03:51:16.279Z',
+    updatedAt: '2026-05-26T03:51:16.279Z',
+    scheduledDate: '2026-05-26T03:51:16.279Z',
+    currentStage: 'accounts' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-05-26T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-05-26T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-05-26T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-05-26T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-05-26T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-05-26T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'completed',
+            'completedAt': '2026-05-26T03:51:16.279Z',
+            'assignedTo': 'Neha Gupta'
+      },
+      'accounts': {
+            'status': 'in_progress',
+            'assignedTo': 'Kavitha Nair',
+            'scheduledDate': '2026-05-26T03:51:16.279Z'
+      }
+}
   },
   {
     id: 'PRJ-1010',
@@ -260,23 +484,48 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99990',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'visualization' as WorkflowType,
+    workflowType: 'survey' as WorkflowType,
     priority: 'medium' as Priority,
     value: 200000,
     description: 'Generated project 10',
-    createdAt: '2026-05-21T03:44:11.763Z',
-    updatedAt: '2026-05-21T03:44:11.763Z',
-    scheduledDate: '2026-05-21T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-05-21T03:51:16.279Z',
+    updatedAt: '2026-05-21T03:51:16.279Z',
+    scheduledDate: '2026-05-21T03:51:16.279Z',
+    currentStage: 'accounts' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-05-21T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-05-21T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-05-21T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-05-21T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-05-21T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-05-21T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'completed',
+            'completedAt': '2026-05-21T03:51:16.279Z',
+            'assignedTo': 'Ravi Kumar'
+      },
+      'mapping': {
+            'status': 'completed',
+            'completedAt': '2026-05-21T03:51:16.279Z',
+            'assignedTo': 'Sneha Patel'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'in_progress',
+            'assignedTo': 'Kavitha Nair',
+            'scheduledDate': '2026-05-21T03:51:16.279Z'
+      }
+}
   },
   {
     id: 'PRJ-1011',
@@ -285,23 +534,48 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99991',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'qs_boq' as WorkflowType,
+    workflowType: 'marking' as WorkflowType,
     priority: 'medium' as Priority,
     value: 210000,
     description: 'Generated project 11',
-    createdAt: '2026-05-06T03:44:11.763Z',
-    updatedAt: '2026-05-06T03:44:11.763Z',
-    scheduledDate: '2026-05-06T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-05-06T03:51:16.279Z',
+    updatedAt: '2026-05-06T03:51:16.279Z',
+    scheduledDate: '2026-05-06T03:51:16.279Z',
+    currentStage: 'accounts' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-05-06T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-05-06T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-05-06T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-05-06T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-05-06T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-05-06T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'completed',
+            'completedAt': '2026-05-06T03:51:16.279Z',
+            'assignedTo': 'Ravi Kumar'
+      },
+      'mapping': {
+            'status': 'completed',
+            'completedAt': '2026-05-06T03:51:16.279Z',
+            'assignedTo': 'Sneha Patel'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'completed',
+            'completedAt': '2026-05-06T03:51:16.279Z',
+            'assignedTo': 'Kavitha Nair'
+      }
+}
   },
   {
     id: 'PRJ-1012',
@@ -310,23 +584,47 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99992',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'marking' as WorkflowType,
+    workflowType: 'drawing' as WorkflowType,
     priority: 'medium' as Priority,
     value: 220000,
     description: 'Generated project 12',
-    createdAt: '2026-04-26T03:44:11.763Z',
-    updatedAt: '2026-04-26T03:44:11.763Z',
-    scheduledDate: '2026-04-26T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-04-26T03:51:16.279Z',
+    updatedAt: '2026-04-26T03:51:16.279Z',
+    scheduledDate: '2026-04-26T03:51:16.279Z',
+    currentStage: 'accounts' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-04-26T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-04-26T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-04-26T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-04-26T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-04-26T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-04-26T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'completed',
+            'completedAt': '2026-04-26T03:51:16.279Z',
+            'assignedTo': 'Arjun Singh'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'completed',
+            'completedAt': '2026-04-26T03:51:16.279Z',
+            'assignedTo': 'Kavitha Nair'
+      }
+}
   },
   {
     id: 'PRJ-1013',
@@ -335,23 +633,47 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99993',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'mapping' as WorkflowType,
+    workflowType: 'visualization' as WorkflowType,
     priority: 'medium' as Priority,
     value: 230000,
     description: 'Generated project 13',
-    createdAt: '2026-04-16T03:44:11.763Z',
-    updatedAt: '2026-04-16T03:44:11.763Z',
-    scheduledDate: '2026-04-16T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-04-16T03:51:16.279Z',
+    updatedAt: '2026-04-16T03:51:16.279Z',
+    scheduledDate: '2026-04-16T03:51:16.279Z',
+    currentStage: 'accounts' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-04-16T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-04-16T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-04-16T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-04-16T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-04-16T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-04-16T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'completed',
+            'completedAt': '2026-04-16T03:51:16.279Z',
+            'assignedTo': 'Arjun Singh'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'completed',
+            'completedAt': '2026-04-16T03:51:16.279Z',
+            'assignedTo': 'Kavitha Nair'
+      }
+}
   },
   {
     id: 'PRJ-1014',
@@ -360,23 +682,47 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99994',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'survey' as WorkflowType,
+    workflowType: 'qs_boq' as WorkflowType,
     priority: 'medium' as Priority,
     value: 240000,
     description: 'Generated project 14',
-    createdAt: '2026-02-10T03:44:11.763Z',
-    updatedAt: '2026-02-10T03:44:11.763Z',
-    scheduledDate: '2026-02-10T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2026-02-10T03:51:16.279Z',
+    updatedAt: '2026-02-10T03:51:16.279Z',
+    scheduledDate: '2026-02-10T03:51:16.279Z',
+    currentStage: 'accounts' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2026-02-10T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2026-02-10T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-02-10T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2026-02-10T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2026-02-10T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2026-02-10T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'mapping': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'completed',
+            'completedAt': '2026-02-10T03:51:16.279Z',
+            'assignedTo': 'Neha Gupta'
+      },
+      'accounts': {
+            'status': 'completed',
+            'completedAt': '2026-02-10T03:51:16.279Z',
+            'assignedTo': 'Kavitha Nair'
+      }
+}
   },
   {
     id: 'PRJ-1015',
@@ -385,22 +731,47 @@ export const MOCK_PROJECTS: Project[] = [
     clientPhone: '+91 99999 99995',
     location: 'Bangalore',
     type: 'Survey',
-    workflowType: 'drawing' as WorkflowType,
+    workflowType: 'survey' as WorkflowType,
     priority: 'medium' as Priority,
     value: 250000,
     description: 'Generated project 15',
-    createdAt: '2025-12-22T03:44:11.763Z',
-    updatedAt: '2025-12-22T03:44:11.763Z',
-    scheduledDate: '2025-12-22T03:44:11.763Z',
-    currentStage: 'accounts',
+    createdAt: '2025-12-22T03:51:16.279Z',
+    updatedAt: '2025-12-22T03:51:16.279Z',
+    scheduledDate: '2025-12-22T03:51:16.279Z',
+    currentStage: 'accounts' as PipelineStage,
     stages: {
-      sales: { status: 'completed', completedAt: '2025-12-22T03:44:11.763Z', assignedTo: 'Admin' },
-      survey: { status: 'completed', completedAt: '2025-12-22T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2025-12-22T03:44:11.763Z' },
-      mapping: { status: 'completed', completedAt: '2025-12-22T03:44:11.763Z', assignedTo: 'Admin', scheduledDate: '2025-12-22T03:44:11.763Z' },
-      drawing: bp('bypassed'),
-      visualization: bp('bypassed'),
-      qs_boq: bp('bypassed'),
-      accounts: { status: 'pending' }
-    }
+      'sales': {
+            'status': 'completed',
+            'completedAt': '2025-12-22T03:51:16.279Z',
+            'assignedTo': 'Priya Sharma'
+      },
+      'survey': {
+            'status': 'completed',
+            'completedAt': '2025-12-22T03:51:16.279Z',
+            'assignedTo': 'Ravi Kumar'
+      },
+      'mapping': {
+            'status': 'completed',
+            'completedAt': '2025-12-22T03:51:16.279Z',
+            'assignedTo': 'Sneha Patel'
+      },
+      'drawing': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'visualization': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'qs_boq': {
+            'status': 'bypassed',
+            'completedAt': '2026-01-01T00:00:00Z'
+      },
+      'accounts': {
+            'status': 'completed',
+            'completedAt': '2025-12-22T03:51:16.279Z',
+            'assignedTo': 'Kavitha Nair'
+      }
+}
   },
 ];
