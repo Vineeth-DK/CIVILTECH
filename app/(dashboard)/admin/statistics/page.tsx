@@ -30,10 +30,10 @@ export default function AdminStatisticsPage() {
   const cutoff = useMemo(() => {
     if (dateFilter === 'all') return new Date(0);
     const d = new Date();
-    if (dateFilter === 'today') d.setHours(0, 0, 0, 0);
-    if (dateFilter === 'week')  d.setDate(d.getDate() - 7);
-    if (dateFilter === 'month') d.setMonth(d.getMonth() - 1);
-    if (dateFilter === 'year')  d.setFullYear(d.getFullYear() - 1);
+    if (dateFilter === 'week')    d.setDate(d.getDate() - 7);
+    if (dateFilter === 'month')   d.setMonth(d.getMonth() - 1);
+    if (dateFilter === 'quarter') d.setMonth(d.getMonth() - 3);
+    if (dateFilter === 'year')    d.setFullYear(d.getFullYear() - 1);
     return d;
   }, [dateFilter]);
 

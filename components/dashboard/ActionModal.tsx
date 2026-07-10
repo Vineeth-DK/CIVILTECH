@@ -129,7 +129,8 @@ export function SurveyActionModal({ project, isOpen, onClose }: {
     if (!project) return;
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    completeSurvey(project.id, mappingRequired);
+    const isMapping = project.workflowType === 'marking' ? true : mappingRequired;
+    completeSurvey(project.id, isMapping);
     setIsLoading(false);
     onClose();
   };
@@ -142,21 +143,23 @@ export function SurveyActionModal({ project, isOpen, onClose }: {
           <p className="text-xs text-amber-700 dark:text-amber-400">Survey complete.</p>
         </div>
         
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Is Mapping Required?</label>
-          <div className="flex gap-3">
-            <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
-                   style={mappingRequired ? { borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)' } : {}}>
-              <input type="radio" checked={mappingRequired} onChange={() => setMappingRequired(true)} className="hidden" />
-              <span className={`text-sm font-medium ${mappingRequired ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>Yes, send to Mapping</span>
-            </label>
-            <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
-                   style={!mappingRequired ? { borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)' } : {}}>
-              <input type="radio" checked={!mappingRequired} onChange={() => setMappingRequired(false)} className="hidden" />
-              <span className={`text-sm font-medium ${!mappingRequired ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`}>No, bypass to Accounts</span>
-            </label>
+        {project?.workflowType === 'survey' && (
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Is Mapping Required?</label>
+            <div className="flex gap-3">
+              <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
+                     style={mappingRequired ? { borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)' } : {}}>
+                <input type="radio" checked={mappingRequired} onChange={() => setMappingRequired(true)} className="hidden" />
+                <span className={`text-sm font-medium ${mappingRequired ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>Yes, send to Mapping</span>
+              </label>
+              <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
+                     style={!mappingRequired ? { borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)' } : {}}>
+                <input type="radio" checked={!mappingRequired} onChange={() => setMappingRequired(false)} className="hidden" />
+                <span className={`text-sm font-medium ${!mappingRequired ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`}>No, bypass to Accounts</span>
+              </label>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex gap-3 pt-1">
           <Button variant="secondary" size="md" className="flex-1" onClick={onClose}>Cancel</Button>

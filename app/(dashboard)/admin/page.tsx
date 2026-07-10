@@ -34,29 +34,43 @@ export default function AdminPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active');
 
-  const active    = allProjects.filter((p) => Object.values(p.stages).some((s) => s.status === 'in_progress' || s.status === 'cancellation_requested'));
-  const completed = allProjects.filter((p) => Object.values(p.stages).every((s) => s.status === 'completed' || s.status === 'bypassed'));
-  const cancelled = allProjects.filter((p) => Object.values(p.stages).some((s) => s.status === 'cancelled' || s.status === 'cancellation_requested'));
+  const dateFilteredProjects = useMemo(() => {
+    if (dateFilter === 'all') return allProjects;
+    const cutoff = new Date();
+    if (dateFilter === 'week')    cutoff.setDate(cutoff.getDate() - 7);
+    if (dateFilter === 'month')   cutoff.setMonth(cutoff.getMonth() - 1);
+    if (dateFilter === 'quarter') cutoff.setMonth(cutoff.getMonth() - 3);
+    if (dateFilter === 'year')    cutoff.setFullYear(cutoff.getFullYear() - 1);
+    return allProjects.filter((p) => {
+      const d = p.scheduledDate ?? p.deadline ?? p.createdAt;
+      return new Date(d) >= cutoff;
+    });
+  }, [allProjects, dateFilter]);
+
+  const active    = dateFilteredProjects.filter((p) => Object.values(p.stages).some((s) => s.status === 'in_progress' || s.status === 'cancellation_requested'));
+  const completed = dateFilteredProjects.filter((p) => Object.values(p.stages).every((s) => s.status === 'completed' || s.status === 'bypassed'));
+  const cancelled = dateFilteredProjects.filter((p) => Object.values(p.stages).some((s) => s.status === 'cancelled' || s.status === 'cancellation_requested'));
 
   const filterChips: { id: ViewFilter; label: string; count: number; color: string; activeColor: string }[] = [
     { id: 'active',    label: 'Active / Pending', count: active.length,    color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-blue-500 bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300' },
     { id: 'completed', label: 'Completed',         count: completed.length, color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
-    { id: 'all',       label: 'All Projects',      count: allProjects.length, color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-violet-500 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300' },
+    { id: 'all',       label: 'All Projects',      count: dateFilteredProjects.length, color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-violet-500 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300' },
   ];
 
   // Filtered set for the pipeline view
   const filteredProjects = useMemo(() => {
-    let base = allProjects;
+    let base = dateFilteredProjects;
+    
     const q = searchQuery.trim().toLowerCase();
     if (q) base = base.filter((p) => p.name.toLowerCase().includes(q) || p.client.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
 
     if (viewFilter === 'active') base = base.filter((p) => Object.values(p.stages).some((s) => s.status === 'in_progress' || s.status === 'cancellation_requested'));
     if (viewFilter === 'completed') base = base.filter((p) => Object.values(p.stages).every((s) => s.status === 'completed' || s.status === 'bypassed'));
     return sortByNearestDate(base);
-  }, [allProjects, searchQuery, viewFilter]);
+  }, [dateFilteredProjects, searchQuery, viewFilter]);
 
   const stats = [
-    { label: 'Total',     value: allProjects.length, icon: <BarChart3 className="w-5 h-5 text-violet-500 dark:text-violet-400" />, color: 'bg-violet-500/10' },
+    { label: 'Total',     value: dateFilteredProjects.length, icon: <BarChart3 className="w-5 h-5 text-violet-500 dark:text-violet-400" />, color: 'bg-violet-500/10' },
     { label: 'Active',    value: active.length,       icon: <Activity className="w-5 h-5 text-blue-500 dark:text-blue-400" />, color: 'bg-blue-500/10' },
     { label: 'Completed', value: completed.length,    icon: <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />, color: 'bg-emerald-500/10' },
     { label: 'Cancelled', value: cancelled.length,    icon: <XCircle className="w-5 h-5 text-red-500 dark:text-red-400" />, color: 'bg-red-500/10' },
