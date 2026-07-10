@@ -13,6 +13,7 @@ const DATE_OPTIONS: { id: DateFilter; label: string }[] = [
   { id: 'today', label: 'Today'      },
   { id: 'week',  label: 'This Week'  },
   { id: 'month', label: 'This Month' },
+  { id: 'quarter',label: 'Last 3 Months' },
   { id: 'year',  label: 'This Year'  },
 ];
 

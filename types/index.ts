@@ -4,7 +4,7 @@ export type StageStatus = 'pending' | 'in_progress' | 'completed' | 'bypassed' |
 
 export type StatusFilter = 'all' | 'in_progress' | 'completed' | 'bypassed' | 'cancelled';
 
-export type DateFilter = 'all' | 'today' | 'week' | 'month' | 'year';
+export type DateFilter = 'all' | 'today' | 'week' | 'month' | 'quarter' | 'year';
 
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
 

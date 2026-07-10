@@ -145,6 +145,7 @@ export function applyFilters(
     if (dateFilter === 'today') cutoff.setHours(0, 0, 0, 0);
     if (dateFilter === 'week')  cutoff.setDate(cutoff.getDate() - 7);
     if (dateFilter === 'month') cutoff.setMonth(cutoff.getMonth() - 1);
+    if (dateFilter === 'quarter') cutoff.setMonth(cutoff.getMonth() - 3);
     if (dateFilter === 'year')  cutoff.setFullYear(cutoff.getFullYear() - 1);
     result = result.filter((p) => {
       const d = p.stages[stage]?.scheduledDate ?? p.scheduledDate ?? p.deadline ?? p.createdAt;
@@ -183,6 +184,7 @@ export function applyAdminFilters(
     if (dateFilter === 'today') cutoff.setHours(0, 0, 0, 0);
     if (dateFilter === 'week')  cutoff.setDate(cutoff.getDate() - 7);
     if (dateFilter === 'month') cutoff.setMonth(cutoff.getMonth() - 1);
+    if (dateFilter === 'quarter') cutoff.setMonth(cutoff.getMonth() - 3);
     if (dateFilter === 'year')  cutoff.setFullYear(cutoff.getFullYear() - 1);
     result = result.filter((p) => {
       const d = p.scheduledDate ?? p.deadline ?? p.createdAt;
