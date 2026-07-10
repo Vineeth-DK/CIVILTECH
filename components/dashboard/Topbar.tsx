@@ -9,12 +9,11 @@ import { cn } from '@/lib/utils';
 import { DateFilter } from '@/types';
 
 const DATE_OPTIONS: { id: DateFilter; label: string }[] = [
-  { id: 'all',   label: 'All Time'   },
-  { id: 'today', label: 'Today'      },
-  { id: 'week',  label: 'This Week'  },
-  { id: 'month', label: 'This Month' },
-  { id: 'quarter',label: 'Last 3 Months' },
-  { id: 'year',  label: 'This Year'  },
+  { id: 'week',    label: 'This Week'  },
+  { id: 'month',   label: 'This Month' },
+  { id: 'quarter', label: 'Last 3 Months' },
+  { id: 'year',    label: 'This Year'  },
+  { id: 'all',     label: 'All Time'   },
 ];
 
 interface TopbarProps {

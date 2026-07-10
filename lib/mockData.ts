@@ -14,20 +14,18 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 100000,
     description: 'Generated project 0',
-    createdAt: '2026-07-08T03:51:16.278Z',
-    updatedAt: '2026-07-08T03:51:16.278Z',
-    scheduledDate: '2026-07-08T03:51:16.278Z',
-    currentStage: 'survey' as PipelineStage,
+    createdAt: '2026-07-08T04:27:16.306Z',
+    updatedAt: '2026-07-08T04:27:16.306Z',
+    scheduledDate: '2026-07-08T04:27:16.306Z',
+    currentStage: 'sales' as PipelineStage,
     stages: {
       'sales': {
-            'status': 'completed',
-            'completedAt': '2026-07-08T03:51:16.278Z',
-            'assignedTo': 'Priya Sharma'
+            'status': 'in_progress',
+            'assignedTo': 'Priya Sharma',
+            'scheduledDate': '2026-07-08T04:27:16.306Z'
       },
       'survey': {
-            'status': 'in_progress',
-            'assignedTo': 'Ravi Kumar',
-            'scheduledDate': '2026-07-08T03:51:16.278Z'
+            'status': 'pending'
       },
       'mapping': {
             'status': 'pending'
@@ -60,25 +58,21 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 110000,
     description: 'Generated project 1',
-    createdAt: '2026-07-07T03:51:16.279Z',
-    updatedAt: '2026-07-07T03:51:16.279Z',
-    scheduledDate: '2026-07-07T03:51:16.279Z',
-    currentStage: 'survey' as PipelineStage,
+    createdAt: '2026-07-07T04:27:16.308Z',
+    updatedAt: '2026-07-07T04:27:16.308Z',
+    scheduledDate: '2026-07-07T04:27:16.308Z',
+    currentStage: 'sales' as PipelineStage,
     stages: {
       'sales': {
-            'status': 'completed',
-            'completedAt': '2026-07-07T03:51:16.279Z',
-            'assignedTo': 'Priya Sharma'
+            'status': 'in_progress',
+            'assignedTo': 'Priya Sharma',
+            'scheduledDate': '2026-07-07T04:27:16.308Z'
       },
       'survey': {
-            'status': 'in_progress',
-            'assignedTo': 'Ravi Kumar',
-            'scheduledDate': '2026-07-07T03:51:16.279Z'
+            'status': 'pending'
       },
       'mapping': {
-            'status': 'in_progress',
-            'assignedTo': 'Sneha Patel',
-            'scheduledDate': '2026-07-07T03:51:16.279Z'
+            'status': 'pending'
       },
       'drawing': {
             'status': 'bypassed',
@@ -108,15 +102,15 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 120000,
     description: 'Generated project 2',
-    createdAt: '2026-07-05T03:51:16.279Z',
-    updatedAt: '2026-07-05T03:51:16.279Z',
-    scheduledDate: '2026-07-05T03:51:16.279Z',
-    currentStage: 'drawing' as PipelineStage,
+    createdAt: '2026-07-05T04:27:16.308Z',
+    updatedAt: '2026-07-05T04:27:16.308Z',
+    scheduledDate: '2026-07-05T04:27:16.308Z',
+    currentStage: 'sales' as PipelineStage,
     stages: {
       'sales': {
-            'status': 'completed',
-            'completedAt': '2026-07-05T03:51:16.279Z',
-            'assignedTo': 'Priya Sharma'
+            'status': 'in_progress',
+            'assignedTo': 'Priya Sharma',
+            'scheduledDate': '2026-07-05T04:27:16.308Z'
       },
       'survey': {
             'status': 'bypassed',
@@ -127,9 +121,7 @@ export const MOCK_PROJECTS: Project[] = [
             'completedAt': '2026-01-01T00:00:00Z'
       },
       'drawing': {
-            'status': 'in_progress',
-            'assignedTo': 'Arjun Singh',
-            'scheduledDate': '2026-07-05T03:51:16.279Z'
+            'status': 'pending'
       },
       'visualization': {
             'status': 'bypassed',
@@ -155,14 +147,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 130000,
     description: 'Generated project 3',
-    createdAt: '2026-06-30T03:51:16.279Z',
-    updatedAt: '2026-06-30T03:51:16.279Z',
-    scheduledDate: '2026-06-30T03:51:16.279Z',
+    createdAt: '2026-06-30T04:27:16.308Z',
+    updatedAt: '2026-06-30T04:27:16.308Z',
+    scheduledDate: '2026-06-30T04:27:16.308Z',
     currentStage: 'visualization' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-06-30T03:51:16.279Z',
+            'completedAt': '2026-06-30T04:27:16.308Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -180,7 +172,7 @@ export const MOCK_PROJECTS: Project[] = [
       'visualization': {
             'status': 'in_progress',
             'assignedTo': 'Arjun Singh',
-            'scheduledDate': '2026-06-30T03:51:16.279Z'
+            'scheduledDate': '2026-06-30T04:27:16.308Z'
       },
       'qs_boq': {
             'status': 'bypassed',
@@ -202,14 +194,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 140000,
     description: 'Generated project 4',
-    createdAt: '2026-06-26T03:51:16.279Z',
-    updatedAt: '2026-06-26T03:51:16.279Z',
-    scheduledDate: '2026-06-26T03:51:16.279Z',
+    createdAt: '2026-06-26T04:27:16.308Z',
+    updatedAt: '2026-06-26T04:27:16.308Z',
+    scheduledDate: '2026-06-26T04:27:16.308Z',
     currentStage: 'qs_boq' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-06-26T03:51:16.279Z',
+            'completedAt': '2026-06-26T04:27:16.308Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -231,7 +223,7 @@ export const MOCK_PROJECTS: Project[] = [
       'qs_boq': {
             'status': 'in_progress',
             'assignedTo': 'Neha Gupta',
-            'scheduledDate': '2026-06-26T03:51:16.279Z'
+            'scheduledDate': '2026-06-26T04:27:16.308Z'
       },
       'accounts': {
             'status': 'pending'
@@ -249,25 +241,25 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 150000,
     description: 'Generated project 5',
-    createdAt: '2026-06-22T03:51:16.279Z',
-    updatedAt: '2026-06-22T03:51:16.279Z',
-    scheduledDate: '2026-06-22T03:51:16.279Z',
+    createdAt: '2026-06-22T04:27:16.308Z',
+    updatedAt: '2026-06-22T04:27:16.308Z',
+    scheduledDate: '2026-06-22T04:27:16.308Z',
     currentStage: 'mapping' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-06-22T03:51:16.279Z',
+            'completedAt': '2026-06-22T04:27:16.308Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
             'status': 'completed',
-            'completedAt': '2026-06-22T03:51:16.279Z',
+            'completedAt': '2026-06-22T04:27:16.308Z',
             'assignedTo': 'Ravi Kumar'
       },
       'mapping': {
             'status': 'in_progress',
             'assignedTo': 'Sneha Patel',
-            'scheduledDate': '2026-06-22T03:51:16.279Z'
+            'scheduledDate': '2026-06-22T04:27:16.308Z'
       },
       'drawing': {
             'status': 'bypassed',
@@ -297,24 +289,24 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 160000,
     description: 'Generated project 6',
-    createdAt: '2026-06-19T03:51:16.279Z',
-    updatedAt: '2026-06-19T03:51:16.279Z',
-    scheduledDate: '2026-06-19T03:51:16.279Z',
+    createdAt: '2026-06-19T04:27:16.308Z',
+    updatedAt: '2026-06-19T04:27:16.308Z',
+    scheduledDate: '2026-06-19T04:27:16.308Z',
     currentStage: 'survey' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-06-19T03:51:16.279Z',
+            'completedAt': '2026-06-19T04:27:16.308Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
             'status': 'in_progress',
             'assignedTo': 'Ravi Kumar',
-            'scheduledDate': '2026-06-19T03:51:16.279Z'
+            'scheduledDate': '2026-06-19T04:27:16.308Z'
       },
       'mapping': {
             'status': 'completed',
-            'completedAt': '2026-06-19T03:51:16.279Z',
+            'completedAt': '2026-06-19T04:27:16.308Z',
             'assignedTo': 'Sneha Patel'
       },
       'drawing': {
@@ -345,14 +337,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 170000,
     description: 'Generated project 7',
-    createdAt: '2026-06-16T03:51:16.279Z',
-    updatedAt: '2026-06-16T03:51:16.279Z',
-    scheduledDate: '2026-06-16T03:51:16.279Z',
+    createdAt: '2026-06-16T04:27:16.308Z',
+    updatedAt: '2026-06-16T04:27:16.308Z',
+    scheduledDate: '2026-06-16T04:27:16.308Z',
     currentStage: 'drawing' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-06-16T03:51:16.279Z',
+            'completedAt': '2026-06-16T04:27:16.308Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -366,7 +358,7 @@ export const MOCK_PROJECTS: Project[] = [
       'drawing': {
             'status': 'in_progress',
             'assignedTo': 'Arjun Singh',
-            'scheduledDate': '2026-06-16T03:51:16.279Z'
+            'scheduledDate': '2026-06-16T04:27:16.308Z'
       },
       'visualization': {
             'status': 'bypassed',
@@ -392,14 +384,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 180000,
     description: 'Generated project 8',
-    createdAt: '2026-06-12T03:51:16.279Z',
-    updatedAt: '2026-06-12T03:51:16.279Z',
-    scheduledDate: '2026-06-12T03:51:16.279Z',
+    createdAt: '2026-06-12T04:27:16.308Z',
+    updatedAt: '2026-06-12T04:27:16.308Z',
+    scheduledDate: '2026-06-12T04:27:16.308Z',
     currentStage: 'visualization' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-06-12T03:51:16.279Z',
+            'completedAt': '2026-06-12T04:27:16.308Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -417,7 +409,7 @@ export const MOCK_PROJECTS: Project[] = [
       'visualization': {
             'status': 'in_progress',
             'assignedTo': 'Arjun Singh',
-            'scheduledDate': '2026-06-12T03:51:16.279Z'
+            'scheduledDate': '2026-06-12T04:27:16.308Z'
       },
       'qs_boq': {
             'status': 'bypassed',
@@ -439,14 +431,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 190000,
     description: 'Generated project 9',
-    createdAt: '2026-05-26T03:51:16.279Z',
-    updatedAt: '2026-05-26T03:51:16.279Z',
-    scheduledDate: '2026-05-26T03:51:16.279Z',
+    createdAt: '2026-05-26T04:27:16.308Z',
+    updatedAt: '2026-05-26T04:27:16.308Z',
+    scheduledDate: '2026-05-26T04:27:16.308Z',
     currentStage: 'accounts' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-05-26T03:51:16.279Z',
+            'completedAt': '2026-05-26T04:27:16.308Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -467,13 +459,13 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'qs_boq': {
             'status': 'completed',
-            'completedAt': '2026-05-26T03:51:16.279Z',
+            'completedAt': '2026-05-26T04:27:16.308Z',
             'assignedTo': 'Neha Gupta'
       },
       'accounts': {
             'status': 'in_progress',
             'assignedTo': 'Kavitha Nair',
-            'scheduledDate': '2026-05-26T03:51:16.279Z'
+            'scheduledDate': '2026-05-26T04:27:16.308Z'
       }
 }
   },
@@ -488,24 +480,24 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 200000,
     description: 'Generated project 10',
-    createdAt: '2026-05-21T03:51:16.279Z',
-    updatedAt: '2026-05-21T03:51:16.279Z',
-    scheduledDate: '2026-05-21T03:51:16.279Z',
+    createdAt: '2026-05-21T04:27:16.309Z',
+    updatedAt: '2026-05-21T04:27:16.309Z',
+    scheduledDate: '2026-05-21T04:27:16.309Z',
     currentStage: 'accounts' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-05-21T03:51:16.279Z',
+            'completedAt': '2026-05-21T04:27:16.309Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
             'status': 'completed',
-            'completedAt': '2026-05-21T03:51:16.279Z',
+            'completedAt': '2026-05-21T04:27:16.309Z',
             'assignedTo': 'Ravi Kumar'
       },
       'mapping': {
             'status': 'completed',
-            'completedAt': '2026-05-21T03:51:16.279Z',
+            'completedAt': '2026-05-21T04:27:16.309Z',
             'assignedTo': 'Sneha Patel'
       },
       'drawing': {
@@ -523,7 +515,7 @@ export const MOCK_PROJECTS: Project[] = [
       'accounts': {
             'status': 'in_progress',
             'assignedTo': 'Kavitha Nair',
-            'scheduledDate': '2026-05-21T03:51:16.279Z'
+            'scheduledDate': '2026-05-21T04:27:16.309Z'
       }
 }
   },
@@ -538,24 +530,24 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 210000,
     description: 'Generated project 11',
-    createdAt: '2026-05-06T03:51:16.279Z',
-    updatedAt: '2026-05-06T03:51:16.279Z',
-    scheduledDate: '2026-05-06T03:51:16.279Z',
+    createdAt: '2026-05-06T04:27:16.309Z',
+    updatedAt: '2026-05-06T04:27:16.309Z',
+    scheduledDate: '2026-05-06T04:27:16.309Z',
     currentStage: 'accounts' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-05-06T03:51:16.279Z',
+            'completedAt': '2026-05-06T04:27:16.309Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
             'status': 'completed',
-            'completedAt': '2026-05-06T03:51:16.279Z',
+            'completedAt': '2026-05-06T04:27:16.309Z',
             'assignedTo': 'Ravi Kumar'
       },
       'mapping': {
             'status': 'completed',
-            'completedAt': '2026-05-06T03:51:16.279Z',
+            'completedAt': '2026-05-06T04:27:16.309Z',
             'assignedTo': 'Sneha Patel'
       },
       'drawing': {
@@ -572,7 +564,7 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'accounts': {
             'status': 'completed',
-            'completedAt': '2026-05-06T03:51:16.279Z',
+            'completedAt': '2026-05-06T04:27:16.309Z',
             'assignedTo': 'Kavitha Nair'
       }
 }
@@ -588,14 +580,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 220000,
     description: 'Generated project 12',
-    createdAt: '2026-04-26T03:51:16.279Z',
-    updatedAt: '2026-04-26T03:51:16.279Z',
-    scheduledDate: '2026-04-26T03:51:16.279Z',
+    createdAt: '2026-04-26T04:27:16.309Z',
+    updatedAt: '2026-04-26T04:27:16.309Z',
+    scheduledDate: '2026-04-26T04:27:16.309Z',
     currentStage: 'accounts' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-04-26T03:51:16.279Z',
+            'completedAt': '2026-04-26T04:27:16.309Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -608,7 +600,7 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'drawing': {
             'status': 'completed',
-            'completedAt': '2026-04-26T03:51:16.279Z',
+            'completedAt': '2026-04-26T04:27:16.309Z',
             'assignedTo': 'Arjun Singh'
       },
       'visualization': {
@@ -621,7 +613,7 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'accounts': {
             'status': 'completed',
-            'completedAt': '2026-04-26T03:51:16.279Z',
+            'completedAt': '2026-04-26T04:27:16.309Z',
             'assignedTo': 'Kavitha Nair'
       }
 }
@@ -637,14 +629,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 230000,
     description: 'Generated project 13',
-    createdAt: '2026-04-16T03:51:16.279Z',
-    updatedAt: '2026-04-16T03:51:16.279Z',
-    scheduledDate: '2026-04-16T03:51:16.279Z',
+    createdAt: '2026-04-16T04:27:16.309Z',
+    updatedAt: '2026-04-16T04:27:16.309Z',
+    scheduledDate: '2026-04-16T04:27:16.309Z',
     currentStage: 'accounts' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-04-16T03:51:16.279Z',
+            'completedAt': '2026-04-16T04:27:16.309Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -661,7 +653,7 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'visualization': {
             'status': 'completed',
-            'completedAt': '2026-04-16T03:51:16.279Z',
+            'completedAt': '2026-04-16T04:27:16.309Z',
             'assignedTo': 'Arjun Singh'
       },
       'qs_boq': {
@@ -670,7 +662,7 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'accounts': {
             'status': 'completed',
-            'completedAt': '2026-04-16T03:51:16.279Z',
+            'completedAt': '2026-04-16T04:27:16.309Z',
             'assignedTo': 'Kavitha Nair'
       }
 }
@@ -686,14 +678,14 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 240000,
     description: 'Generated project 14',
-    createdAt: '2026-02-10T03:51:16.279Z',
-    updatedAt: '2026-02-10T03:51:16.279Z',
-    scheduledDate: '2026-02-10T03:51:16.279Z',
+    createdAt: '2026-02-10T04:27:16.309Z',
+    updatedAt: '2026-02-10T04:27:16.309Z',
+    scheduledDate: '2026-02-10T04:27:16.309Z',
     currentStage: 'accounts' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2026-02-10T03:51:16.279Z',
+            'completedAt': '2026-02-10T04:27:16.309Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
@@ -714,12 +706,12 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'qs_boq': {
             'status': 'completed',
-            'completedAt': '2026-02-10T03:51:16.279Z',
+            'completedAt': '2026-02-10T04:27:16.309Z',
             'assignedTo': 'Neha Gupta'
       },
       'accounts': {
             'status': 'completed',
-            'completedAt': '2026-02-10T03:51:16.279Z',
+            'completedAt': '2026-02-10T04:27:16.309Z',
             'assignedTo': 'Kavitha Nair'
       }
 }
@@ -735,24 +727,24 @@ export const MOCK_PROJECTS: Project[] = [
     priority: 'medium' as Priority,
     value: 250000,
     description: 'Generated project 15',
-    createdAt: '2025-12-22T03:51:16.279Z',
-    updatedAt: '2025-12-22T03:51:16.279Z',
-    scheduledDate: '2025-12-22T03:51:16.279Z',
+    createdAt: '2025-12-22T04:27:16.309Z',
+    updatedAt: '2025-12-22T04:27:16.309Z',
+    scheduledDate: '2025-12-22T04:27:16.309Z',
     currentStage: 'accounts' as PipelineStage,
     stages: {
       'sales': {
             'status': 'completed',
-            'completedAt': '2025-12-22T03:51:16.279Z',
+            'completedAt': '2025-12-22T04:27:16.309Z',
             'assignedTo': 'Priya Sharma'
       },
       'survey': {
             'status': 'completed',
-            'completedAt': '2025-12-22T03:51:16.279Z',
+            'completedAt': '2025-12-22T04:27:16.309Z',
             'assignedTo': 'Ravi Kumar'
       },
       'mapping': {
             'status': 'completed',
-            'completedAt': '2025-12-22T03:51:16.279Z',
+            'completedAt': '2025-12-22T04:27:16.309Z',
             'assignedTo': 'Sneha Patel'
       },
       'drawing': {
@@ -769,7 +761,7 @@ export const MOCK_PROJECTS: Project[] = [
       },
       'accounts': {
             'status': 'completed',
-            'completedAt': '2025-12-22T03:51:16.279Z',
+            'completedAt': '2025-12-22T04:27:16.309Z',
             'assignedTo': 'Kavitha Nair'
       }
 }

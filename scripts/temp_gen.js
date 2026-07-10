@@ -57,13 +57,16 @@ for(let i=0; i<offsets.length; i++) {
       stages.survey = comp('Ravi Kumar');
       stages.mapping = comp('Sneha Patel');
       stages.accounts = inProg('Kavitha Nair');
-    } else if (daysAgo > 7) {
+    } else if (daysAgo > 14) {
       currentStage = 'mapping';
       stages.survey = comp('Ravi Kumar');
       stages.mapping = inProg('Sneha Patel');
-    } else {
+    } else if (daysAgo > 7) {
       currentStage = 'survey';
       stages.survey = inProg('Ravi Kumar');
+    } else {
+      currentStage = 'sales';
+      stages.sales = inProg('Priya Sharma');
     }
   } else if (wf === 'marking') {
     stages = {
@@ -85,14 +88,17 @@ for(let i=0; i<offsets.length; i++) {
       stages.survey = comp('Ravi Kumar');
       stages.mapping = comp('Sneha Patel');
       stages.accounts = inProg('Kavitha Nair');
-    } else if (daysAgo > 7) {
+    } else if (daysAgo > 14) {
       currentStage = 'survey';
       stages.survey = inProg('Ravi Kumar');
       stages.mapping = comp('Sneha Patel');
-    } else {
+    } else if (daysAgo > 7) {
       currentStage = 'survey';
       stages.survey = inProg('Ravi Kumar');
       stages.mapping = inProg('Sneha Patel');
+    } else {
+      currentStage = 'sales';
+      stages.sales = inProg('Priya Sharma');
     }
   } else if (wf === 'drawing') {
     stages = {
@@ -112,9 +118,12 @@ for(let i=0; i<offsets.length; i++) {
       currentStage = 'accounts';
       stages.drawing = comp('Arjun Singh');
       stages.accounts = inProg('Kavitha Nair');
-    } else {
+    } else if (daysAgo > 7) {
       currentStage = 'drawing';
       stages.drawing = inProg('Arjun Singh');
+    } else {
+      currentStage = 'sales';
+      stages.sales = inProg('Priya Sharma');
     }
   } else if (wf === 'visualization') {
     stages = {
@@ -134,9 +143,12 @@ for(let i=0; i<offsets.length; i++) {
       currentStage = 'accounts';
       stages.visualization = comp('Arjun Singh');
       stages.accounts = inProg('Kavitha Nair');
-    } else {
+    } else if (daysAgo > 7) {
       currentStage = 'visualization';
       stages.visualization = inProg('Arjun Singh');
+    } else {
+      currentStage = 'sales';
+      stages.sales = inProg('Priya Sharma');
     }
   } else if (wf === 'qs_boq') {
     stages = {
@@ -156,9 +168,12 @@ for(let i=0; i<offsets.length; i++) {
       currentStage = 'accounts';
       stages.qs_boq = comp('Neha Gupta');
       stages.accounts = inProg('Kavitha Nair');
-    } else {
+    } else if (daysAgo > 7) {
       currentStage = 'qs_boq';
       stages.qs_boq = inProg('Neha Gupta');
+    } else {
+      currentStage = 'sales';
+      stages.sales = inProg('Priya Sharma');
     }
   }
 

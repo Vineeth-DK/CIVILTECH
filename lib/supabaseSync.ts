@@ -43,7 +43,7 @@ export function fromDB(row: any): Project {
     description: row.description ?? '',
     area: row.area ? Number(row.area) : undefined,
     mapsLink: row.maps_link ?? undefined,
-    stages: row.stages,
+    stages: typeof row.stages === 'string' ? JSON.parse(row.stages) : row.stages,
   };
 }
 
