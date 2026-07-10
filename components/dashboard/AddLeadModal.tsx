@@ -14,8 +14,7 @@ const PREDEFINED_TYPES = [
 ];
 
 const WORKFLOW_OPTIONS: { value: WorkflowType; label: string; description: string }[] = [
-  { value: 'survey_only',   label: '🗺️ Survey (No Mapping)', description: 'Survey → Accounts' },
-  { value: 'survey_mapping',label: '🗺️ Survey + Mapping',   description: 'Survey → Mapping → Accounts' },
+  { value: 'survey',        label: '🗺️ Survey',           description: 'Survey → Accounts (mapping optional)' },
   { value: 'marking',       label: '📍 Survey + Marking',    description: 'Survey + Mapping notified simultaneously → Accounts' },
   { value: 'drawing',       label: '✏️ Drawing',          description: 'Technical drawings / CAD → Accounts' },
   { value: 'visualization', label: '🏗️ 3D Visualization', description: '3D models & renders → Accounts' },
@@ -47,7 +46,7 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isOther = selectedType === 'Other';
-  const isFieldWorkflow = selectedWorkflow === 'marking' || selectedWorkflow === 'mapping';
+  const isFieldWorkflow = selectedWorkflow === 'marking' || selectedWorkflow === 'survey';
   const isDeadlineWorkflow = selectedWorkflow === 'drawing' || selectedWorkflow === 'visualization';
 
   const setField = (key: keyof (NewLead & { customType: string }), val: string | number) => {

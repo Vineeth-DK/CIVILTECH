@@ -30,25 +30,13 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
         accounts:      pending,
       };
 
-    case 'survey_mapping':
+    case 'survey':
     case 'mapping':
-      // Survey first → Mapping → Accounts
+      // Survey first → Mapping (if required) → Accounts
       return {
         sales,
         survey:        pending,
         mapping:       pending,
-        drawing:       bypassed(),
-        visualization: bypassed(),
-        qs_boq:        bypassed(),
-        accounts:      pending,
-      };
-
-    case 'survey_only':
-      // Survey first → Accounts (no mapping)
-      return {
-        sales,
-        survey:        pending,
-        mapping:       bypassed(),
         drawing:       bypassed(),
         visualization: bypassed(),
         qs_boq:        bypassed(),
@@ -203,7 +191,7 @@ export const useProjectStore = create<ProjectStore>()(
               };
             }
 
-            if (wf === 'mapping' || wf === 'survey_mapping' || wf === 'survey_only') {
+            if (wf === 'mapping' || wf === 'survey') {
               return {
                 ...base,
                 currentStage: 'survey' as PipelineStage,

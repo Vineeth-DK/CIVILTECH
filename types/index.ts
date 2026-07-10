@@ -19,7 +19,7 @@ export type PipelineStage = 'sales' | 'survey' | 'mapping' | 'drawing' | 'visual
  * - drawing:       Sales → Drawing → Accounts
  * - visualization: Sales → 3D Visualization → Accounts
  */
-export type WorkflowType = 'marking' | 'mapping' | 'drawing' | 'visualization' | 'survey_only' | 'survey_mapping' | 'qs_boq';
+export type WorkflowType = 'marking' | 'mapping' | 'survey' | 'drawing' | 'visualization' | 'qs_boq';
 
 export interface StageRecord {
   status: StageStatus;

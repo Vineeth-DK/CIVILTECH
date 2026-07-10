@@ -36,12 +36,7 @@ export function SalesActionModal({ project, isOpen, onClose }: {
   const [isLoading, setIsLoading] = useState(false);
   const { confirmLead } = useProjectStore();
 
-  const wfLabel: Record<string, string> = {
-    marking:       '📍 Marking — Survey + Mapping simultaneously → Accounts',
-    mapping:       '🗺️ Mapping — Survey → Mapping → Accounts',
-    drawing:       '✏️ Drawing → Accounts',
-    visualization: '🏗️ 3D Visualization → Accounts',
-  };
+
 
   const handleConfirm = async () => {
     if (!project) return;
@@ -57,14 +52,9 @@ export function SalesActionModal({ project, isOpen, onClose }: {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Confirm Lead" description={project?.name ?? ''}>
       <div className="space-y-4">
-        {project && (
+        {project && (project.scheduledDate || project.deadline) && (
           <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
-            <div className="flex items-center gap-1.5 mb-1">
-              <GitBranch className="w-3.5 h-3.5 text-blue-500" />
-              <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Workflow</p>
-            </div>
-            <p className="text-xs text-blue-600 dark:text-blue-400">{wfLabel[project.workflowType]}</p>
-            {project.scheduledDate && <p className="text-xs text-blue-500 mt-1">📅 Scheduled: {formatDate(project.scheduledDate)}</p>}
+            {project.scheduledDate && <p className="text-xs text-blue-500">📅 Scheduled: {formatDate(project.scheduledDate)}</p>}
             {project.deadline && <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⏰ Deadline: {formatDate(project.deadline)}</p>}
           </div>
         )}
