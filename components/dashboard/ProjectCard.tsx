@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { MapPin, Building2, Calendar, ChevronRight, Phone, ExternalLink, StickyNote, Clock, IndianRupee, XCircle, CalendarClock, AlertCircle, ArrowRightLeft } from 'lucide-react';
+import { MapPin, Building2, Calendar, ChevronRight, Phone, ExternalLink, StickyNote, Clock, IndianRupee, XCircle, CalendarClock, AlertCircle, ArrowRightLeft, Pen } from 'lucide-react';
 import { Project, PipelineStage } from '@/types';
 import { StatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -33,13 +33,14 @@ interface ProjectCardProps {
   project: Project;
   stage: PipelineStage;
   onAction?: (project: Project) => void;
+  onEdit?: (project: Project) => void;
   actionLabel?: string | ((project: Project) => string | null);
   /** If true, show a Reschedule button instead of action (for cancelled projects in Sales/Admin) */
   showReschedule?: boolean;
   index?: number;
 }
 
-export function ProjectCard({ project, stage, onAction, actionLabel, showReschedule, index = 0 }: ProjectCardProps) {
+export function ProjectCard({ project, stage, onAction, onEdit, actionLabel, showReschedule, index = 0 }: ProjectCardProps) {
   const [expanded, setExpanded]       = useState(false);
   const [isCancelOpen, setIsCancelOpen]     = useState(false);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
@@ -94,12 +95,24 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
                   {project.id}
                 </span>
                 <StatusBadge status={stageRecord.status} />
+                {project.editRequest && (
+                  <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider font-semibold rounded bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                    Edit Pending
+                  </span>
+                )}
               </div>
-              <h3 className="font-display font-semibold text-slate-900 dark:text-white text-sm leading-snug line-clamp-2">
+              <h3 className="font-display font-semibold text-slate-900 dark:text-white text-sm leading-snug line-clamp-2 pr-4">
                 {project.name}
               </h3>
             </div>
-            <ChevronRight className={cn('w-4 h-4 text-slate-400 flex-shrink-0 mt-1 transition-transform duration-200', expanded && 'rotate-90')} />
+            <div className="flex flex-col items-center gap-2 flex-shrink-0 mt-0.5">
+              {onEdit && (
+                <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} className="p-1 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors">
+                  <Pen className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <ChevronRight className={cn('w-4 h-4 text-slate-400 transition-transform duration-200', expanded && 'rotate-90')} />
+            </div>
           </div>
 
           {/* Meta */}
@@ -203,13 +216,6 @@ export function ProjectCard({ project, stage, onAction, actionLabel, showResched
               </div>
             )}
 
-            {/* Parallel info for marking workflow */}
-            {(project.workflowType === 'marking') && (stage === 'survey' || stage === 'mapping') && stageRecord.status === 'in_progress' && (
-              <div className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-xs text-indigo-700 dark:text-indigo-400">
-                <CalendarClock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                <span>Marking workflow — Survey &amp; Mapping work in parallel. Both must complete before Accounts.</span>
-              </div>
-            )}
 
             {/* Action button */}
             {canAct && (

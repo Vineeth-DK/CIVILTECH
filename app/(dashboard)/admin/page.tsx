@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart3, Activity, XCircle, CheckCircle2, PlusCircle,
-  TrendingUp, Map, Layers, PenTool, Box, DollarSign, Layers3, Trash2,
+  TrendingUp, Map, Layers, PenTool, Box, DollarSign, Layers3, Trash2, Pen, Edit3,
 } from 'lucide-react';
 import { useProjectStore } from '@/store/useProjectStore';
 import { Topbar } from '@/components/dashboard/Topbar';
@@ -13,11 +13,12 @@ import { ProjectTimeline } from '@/components/dashboard/ProjectTimeline';
 import { DeleteModal } from '@/components/dashboard/ActionModal';
 import { PriorityBadge } from '@/components/ui/Badge';
 import { AddLeadModal } from '@/components/dashboard/AddLeadModal';
+import { EditLeadModal } from '@/components/dashboard/EditLeadModal';
 import { formatDate, formatCurrency, sortByNearestDate } from '@/lib/utils';
 import { PipelineStage, Project } from '@/types';
 import Image from 'next/image';
 
-type ViewFilter = 'active' | 'completed' | 'all';
+type ViewFilter = 'active' | 'completed' | 'all' | 'edits';
 
 const DEPT_SECTIONS: { stage: PipelineStage; label: string; icon: React.FC<{className?: string}>; color: string }[] = [
   { stage: 'sales',         label: 'Sales',            icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
@@ -32,6 +33,8 @@ export default function AdminPage() {
   const { getAllProjects, searchQuery, dateFilter } = useProjectStore();
   const allProjects = getAllProjects();
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active');
 
   const dateFilteredProjects = useMemo(() => {
@@ -55,6 +58,7 @@ export default function AdminPage() {
     { id: 'active',    label: 'Active / Pending', count: active.length,    color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-blue-500 bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300' },
     { id: 'completed', label: 'Completed',         count: completed.length, color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
     { id: 'all',       label: 'All Projects',      count: dateFilteredProjects.length, color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-violet-500 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300' },
+    { id: 'edits',     label: 'Edit Requests',     count: dateFilteredProjects.filter(p => p.editRequest).length, color: 'border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10', activeColor: 'border-amber-500 bg-amber-500 text-white shadow-md' },
   ];
 
   // Filtered set for the pipeline view
@@ -66,6 +70,8 @@ export default function AdminPage() {
 
     if (viewFilter === 'active') base = base.filter((p) => Object.values(p.stages).some((s) => s.status === 'in_progress' || s.status === 'cancellation_requested'));
     if (viewFilter === 'completed') base = base.filter((p) => Object.values(p.stages).every((s) => s.status === 'completed' || s.status === 'bypassed'));
+    if (viewFilter === 'edits') base = base.filter((p) => p.editRequest);
+
     return sortByNearestDate(base);
   }, [dateFilteredProjects, searchQuery, viewFilter]);
 
@@ -114,7 +120,7 @@ export default function AdminPage() {
               );
               if (deptProjects.length === 0) return null;
               return (
-                <DeptSection key={stage} stage={stage} label={label} color={color} Icon={Icon} projects={deptProjects} />
+                <DeptSection key={stage} stage={stage} label={label} color={color} Icon={Icon} projects={deptProjects} onEdit={(p) => { setSelectedProject(p); setIsEditOpen(true); }} />
               );
             })}
             {filteredProjects.length === 0 && <EmptyPipeline message="No active projects" sub="All projects are completed or pending assignment." />}
@@ -127,7 +133,7 @@ export default function AdminPage() {
             <SectionHeader label="Completed Projects" count={filteredProjects.length} />
             <div className="divide-y divide-slate-100 dark:divide-white/5">
               <AnimatePresence>
-                {filteredProjects.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} />)}
+                {filteredProjects.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} onEdit={(p) => { setSelectedProject(p); setIsEditOpen(true); }} />)}
               </AnimatePresence>
               {filteredProjects.length === 0 && <EmptyPipeline message="No completed projects yet" sub="Projects appear here after all stages are done." />}
             </div>
@@ -140,23 +146,36 @@ export default function AdminPage() {
             <SectionHeader label="All Projects — Pipeline View" count={filteredProjects.length} />
             <div className="divide-y divide-slate-100 dark:divide-white/5">
               <AnimatePresence>
-                {filteredProjects.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} />)}
+                {filteredProjects.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} onEdit={(p) => { setSelectedProject(p); setIsEditOpen(true); }} />)}
               </AnimatePresence>
               {filteredProjects.length === 0 && <EmptyPipeline message="No projects match search" sub="Try a different search term." />}
+            </div>
+          </div>
+        )}
+        {/* ── Edit Requests ─────────────────────────────────────────── */}
+        {viewFilter === 'edits' && (
+          <div className="glass rounded-2xl overflow-hidden">
+            <SectionHeader label="Pending Edit Requests" count={filteredProjects.length} />
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
+              <AnimatePresence>
+                {filteredProjects.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} onEdit={(p) => { setSelectedProject(p); setIsEditOpen(true); }} />)}
+              </AnimatePresence>
+              {filteredProjects.length === 0 && <EmptyPipeline message="No edit requests" sub="All caught up!" />}
             </div>
           </div>
         )}
       </div>
 
       <AddLeadModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} />
+      <EditLeadModal isOpen={isEditOpen} onClose={() => { setIsEditOpen(false); setSelectedProject(null); }} project={selectedProject} />
     </div>
   );
 }
 
 // ── Dept Section ──────────────────────────────────────────────────────────────
 
-function DeptSection({ stage, label, color, Icon, projects }: {
-  stage: PipelineStage; label: string; color: string; Icon: React.FC<{className?: string}>; projects: Project[];
+function DeptSection({ stage, label, color, Icon, projects, onEdit }: {
+  stage: PipelineStage; label: string; color: string; Icon: React.FC<{className?: string}>; projects: Project[]; onEdit: (p: Project) => void;
 }) {
   const pending    = projects.filter((p) => p.stages[stage]?.status === 'in_progress');
   const requested  = projects.filter((p) => p.stages[stage]?.status === 'cancellation_requested');
@@ -181,7 +200,7 @@ function DeptSection({ stage, label, color, Icon, projects }: {
         <div>
           <p className="px-5 pt-2.5 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Pending ({pending.length})</p>
           <div className="divide-y divide-slate-100 dark:divide-white/5">
-            {pending.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} highlightStage={stage} />)}
+            {pending.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} highlightStage={stage} onEdit={onEdit} />)}
           </div>
         </div>
       )}
@@ -191,7 +210,7 @@ function DeptSection({ stage, label, color, Icon, projects }: {
         <div className="bg-orange-50/50 dark:bg-orange-500/5">
           <p className="px-5 pt-2.5 pb-1 text-[10px] font-bold text-orange-500 dark:text-orange-400 uppercase tracking-widest">⚠ Cancellation Requests ({requested.length})</p>
           <div className="divide-y divide-orange-100 dark:divide-orange-500/10">
-            {requested.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} highlightStage={stage} />)}
+            {requested.map((p, i) => <AdminProjectRow key={p.id} project={p} index={i} highlightStage={stage} onEdit={onEdit} />)}
           </div>
         </div>
       )}
@@ -201,10 +220,11 @@ function DeptSection({ stage, label, color, Icon, projects }: {
 
 // ── Shared project row ────────────────────────────────────────────────────────
 
-function AdminProjectRow({ project, index, highlightStage }: {
-  project: Project; index: number; highlightStage?: PipelineStage;
+function AdminProjectRow({ project, index, highlightStage, onEdit }: {
+  project: Project; index: number; highlightStage?: PipelineStage; onEdit?: (p: Project) => void;
 }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { approveEdit, rejectEdit } = useProjectStore();
   const stageColors: Record<string, string> = {
     sales:         'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20',
     survey:        'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20',
@@ -235,6 +255,11 @@ function AdminProjectRow({ project, index, highlightStage }: {
                 ⚠ Cancel Requested
               </span>
             )}
+            {project.editRequest && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full border font-semibold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30">
+                ✏️ Edit Pending
+              </span>
+            )}
           </div>
           <h3 className="font-semibold text-slate-900 dark:text-white text-sm leading-snug">{project.name}</h3>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
@@ -246,6 +271,24 @@ function AdminProjectRow({ project, index, highlightStage }: {
           {cancelRequested && highlightStage && project.stages[highlightStage]?.cancelReason && (
             <p className="text-xs text-orange-600 dark:text-orange-400 mt-0.5 italic">"{project.stages[highlightStage].cancelReason}"</p>
           )}
+          {project.editRequest && (
+            <div className="mt-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20">
+              <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-1">Edit Proposed by {project.editRequest.requestedBy}</p>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600 dark:text-slate-400 mb-2">
+                {Object.entries(project.editRequest.updates).map(([k, v]) => (
+                  <span key={k}><strong>{k}:</strong> {String(v)}</span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={(e) => { e.stopPropagation(); approveEdit(project.id); }} className="px-3 py-1 rounded-lg text-[11px] font-semibold bg-amber-500 hover:bg-amber-600 text-white transition-colors shadow-sm">
+                  Approve
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); rejectEdit(project.id); }} className="px-3 py-1 rounded-lg text-[11px] font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                  Reject
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
           <p className="text-xs text-slate-400 dark:text-slate-500">{formatDate(project.createdAt)}</p>
@@ -254,9 +297,16 @@ function AdminProjectRow({ project, index, highlightStage }: {
               {isScheduled ? '📅' : '⏰'} {formatDate(displayDate)}
             </p>
           )}
-          <button onClick={() => setIsDeleteOpen(true)} className="p-1 mt-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors">
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-1 mt-1">
+            {onEdit && (
+              <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} className="p-1 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-md transition-colors">
+                <Pen className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <button onClick={() => setIsDeleteOpen(true)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
       <ProjectTimeline project={project} />

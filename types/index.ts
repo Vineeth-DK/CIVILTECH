@@ -64,6 +64,11 @@ export interface Project {
   updatedAt: string;
   scheduledDate?: string;     // survey/mapping field-visit date
   deadline?: string;          // drawing/viz/accounts deadline
+  editRequest?: {
+    requestedBy: string;
+    requestedAt: string;
+    updates: Partial<Project>;
+  };
   stages: {
     sales:         StageRecord;
     survey:        StageRecord;
@@ -108,6 +113,10 @@ export interface ProjectStore {
 
   // Lead management
   addLead: (lead: NewLead) => void;
+  requestEdit: (projectId: string, updates: Partial<Project>, requestedBy: string) => void;
+  approveEdit: (projectId: string) => void;
+  rejectEdit: (projectId: string) => void;
+  editLead: (projectId: string, updates: Partial<Project>) => void;
 
   // Pipeline actions
   confirmLead: (projectId: string, details: LeadDetails) => void;

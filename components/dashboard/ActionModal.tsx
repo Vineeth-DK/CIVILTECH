@@ -150,12 +150,12 @@ export function SurveyActionModal({ project, isOpen, onClose }: {
               <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
                      style={mappingRequired ? { borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)' } : {}}>
                 <input type="radio" checked={mappingRequired} onChange={() => setMappingRequired(true)} className="hidden" />
-                <span className={`text-sm font-medium ${mappingRequired ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>Yes, send to Mapping</span>
+                <span className={`text-sm font-medium ${mappingRequired ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>Yes</span>
               </label>
               <label className="flex-1 flex items-center justify-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-slate-200 dark:border-white/10"
                      style={!mappingRequired ? { borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)' } : {}}>
                 <input type="radio" checked={!mappingRequired} onChange={() => setMappingRequired(false)} className="hidden" />
-                <span className={`text-sm font-medium ${!mappingRequired ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`}>No, bypass to Accounts</span>
+                <span className={`text-sm font-medium ${!mappingRequired ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`}>No</span>
               </label>
             </div>
           </div>
@@ -463,8 +463,10 @@ export function DeleteModal({ project, isOpen, onClose }: {
   const [isLoading, setIsLoading]     = useState(false);
   const { deleteProject } = useProjectStore();
 
+  const isConfirmed = confirmText.trim().toLowerCase() === 'delete';
+
   const handleConfirm = async () => {
-    if (!project || confirmText !== 'DELETE') return;
+    if (!project || !isConfirmed) return;
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 500));
     deleteProject(project.id);
@@ -491,7 +493,7 @@ export function DeleteModal({ project, isOpen, onClose }: {
         </div>
         <div className="flex gap-3 pt-2">
           <Button variant="secondary" size="md" className="flex-1" onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" size="md" className="flex-1 !bg-red-500 hover:!bg-red-600 dark:!bg-red-600 dark:hover:!bg-red-700 !border-transparent text-white" disabled={confirmText !== 'DELETE'} isLoading={isLoading}
+          <Button variant="primary" size="md" className="flex-1 !bg-red-500 hover:!bg-red-600 dark:!bg-red-600 dark:hover:!bg-red-700 !border-transparent text-white" disabled={!isConfirmed} isLoading={isLoading}
             icon={<Trash2 className="w-4 h-4" />} onClick={handleConfirm}>
             Delete Forever
           </Button>

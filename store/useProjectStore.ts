@@ -161,6 +161,52 @@ export const useProjectStore = create<ProjectStore>()(
         set((state) => ({ projects: [...state.projects, newProject] }));
       },
 
+      requestEdit: (projectId: string, updates: Partial<Project>, requestedBy: string) => {
+        set((state) => ({
+          projects: state.projects.map((p) => {
+            if (p.id !== projectId) return p;
+            return {
+              ...p,
+              editRequest: { requestedBy, requestedAt: now(), updates },
+              updatedAt: now(),
+            };
+          }),
+        }));
+      },
+
+      approveEdit: (projectId: string) => {
+        set((state) => ({
+          projects: state.projects.map((p) => {
+            if (p.id !== projectId || !p.editRequest) return p;
+            const newProj = { ...p, ...p.editRequest.updates };
+            delete newProj.editRequest;
+            return { ...newProj, updatedAt: now() };
+          }),
+        }));
+      },
+
+      rejectEdit: (projectId: string) => {
+        set((state) => ({
+          projects: state.projects.map((p) => {
+            if (p.id !== projectId || !p.editRequest) return p;
+            const newProj = { ...p };
+            delete newProj.editRequest;
+            return { ...newProj, updatedAt: now() };
+          }),
+        }));
+      },
+
+      editLead: (projectId: string, updates: Partial<Project>) => {
+        set((state) => ({
+          projects: state.projects.map((p) => {
+            if (p.id !== projectId) return p;
+            const newProj = { ...p, ...updates };
+            delete newProj.editRequest; // direct edit clears any pending
+            return { ...newProj, updatedAt: now() };
+          }),
+        }));
+      },
+
       // ── confirmLead — Sales confirms lead, routes based on workflow ────────
 
       confirmLead: (projectId: string, details: LeadDetails) => {

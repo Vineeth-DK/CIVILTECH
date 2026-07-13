@@ -87,7 +87,9 @@ export function Modal({
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              {children}
+              <div className="max-h-[75vh] overflow-y-auto px-1 -mx-1 custom-scrollbar">
+                {children}
+              </div>
             </motion.div>
           </div>
         </>

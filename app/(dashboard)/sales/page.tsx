@@ -9,6 +9,7 @@ import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { StatsRow } from '@/components/dashboard/StatsRow';
 import { SalesActionModal } from '@/components/dashboard/ActionModal';
 import { AddLeadModal } from '@/components/dashboard/AddLeadModal';
+import { EditLeadModal } from '@/components/dashboard/EditLeadModal';
 import { Project } from '@/types';
 import { applyFilters, sortByNearestDate } from '@/lib/utils';
 
@@ -17,6 +18,7 @@ export default function SalesPage() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isActionOpen, setIsActionOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const allTouched = projects.filter((p) =>
     p.stages.sales.status !== 'pending' && p.stages.sales.status !== 'bypassed'
@@ -69,6 +71,7 @@ export default function SalesPage() {
                 {displayed.map((project, i) => (
                   <ProjectCard key={project.id} project={project} stage="sales"
                     onAction={(p) => { setSelectedProject(p); setIsActionOpen(true); }}
+                    onEdit={(p) => { setSelectedProject(p); setIsEditOpen(true); }}
                     actionLabel="Confirm Lead →" index={i} />
                 ))}
               </AnimatePresence>
@@ -103,6 +106,7 @@ export default function SalesPage() {
       <SalesActionModal project={selectedProject} isOpen={isActionOpen}
         onClose={() => { setIsActionOpen(false); setSelectedProject(null); }} />
       <AddLeadModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} />
+      <EditLeadModal isOpen={isEditOpen} onClose={() => { setIsEditOpen(false); setSelectedProject(null); }} project={selectedProject} />
     </div>
   );
 }
