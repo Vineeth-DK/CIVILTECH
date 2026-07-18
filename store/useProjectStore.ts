@@ -6,7 +6,7 @@ import {
   Project, Role, User, PipelineStage, ProjectStore,
   StageStatus, StatusFilter, DateFilter, LeadDetails, NewLead, WorkflowType,
 } from '@/types';
-import { CREDENTIALS } from '@/lib/auth';
+import { useAuthStore } from './useAuthStore';
 import { fetchProjectsDB, upsertProjectDB, deleteProjectDB, subscribeProjectsDB } from '@/lib/supabaseSync';
 
 const now = () => new Date().toISOString();
@@ -114,7 +114,7 @@ export const useProjectStore = create<ProjectStore>()(
 
       loginWithCredentials: (username: string, password: string): boolean => {
         const key  = username.trim().toLowerCase();
-        const cred = CREDENTIALS[key];
+        const cred = useAuthStore.getState().credentials[key];
         if (!cred || cred.password !== password) return false;
         set({ currentUser: { role: cred.role, name: cred.name }, currentFilter: 'all', searchQuery: '', dateFilter: 'all' });
         return true;

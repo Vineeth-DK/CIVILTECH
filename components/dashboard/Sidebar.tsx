@@ -8,7 +8,7 @@ import Link from 'next/link';
 import {
   TrendingUp, Map, Layers, PenTool, DollarSign, ShieldCheck,
   ChevronLeft, ChevronRight, LogOut, Box,
-  SlidersHorizontal, Clock, LayoutGrid, BarChart2, XCircle, Calculator,
+  SlidersHorizontal, Clock, LayoutGrid, BarChart2, XCircle, Calculator, Users,
 } from 'lucide-react';
 import { useProjectStore } from '@/store/useProjectStore';
 import { cn } from '@/lib/utils';
@@ -16,9 +16,10 @@ import { Role, StatusFilter } from '@/types';
 
 // Admin-only top-level navigation
 const ADMIN_NAV = [
-  { href: '/admin',            icon: ShieldCheck, label: 'Overview',              active: 'text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20' },
-  { href: '/admin/cancelled',  icon: XCircle,     label: 'Cancelled / Reschedule', active: 'text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20' },
-  { href: '/admin/statistics', icon: BarChart2,    label: 'Statistics',             active: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  { href: '/admin',             icon: ShieldCheck, label: 'Overview',              active: 'text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20' },
+  { href: '/admin/cancelled',   icon: XCircle,     label: 'Cancelled / Reschedule', active: 'text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20' },
+  { href: '/admin/statistics',  icon: BarChart2,   label: 'Statistics',             active: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  { href: '/admin/credentials', icon: Users,       label: 'User Management',        active: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
 ];
 
 // Dept navigation (all roles have one of these)

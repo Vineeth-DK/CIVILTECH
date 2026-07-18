@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -17,7 +17,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { useProjectStore } from '@/store/useProjectStore';
-import { CREDENTIALS } from '@/lib/auth';
+import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
@@ -29,6 +29,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { fetchCredentials, credentials } = useAuthStore();
+
+  useEffect(() => {
+    fetchCredentials();
+  }, [fetchCredentials]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +52,8 @@ export default function LoginPage() {
       return;
     }
 
-    const cred = CREDENTIALS[username.trim().toLowerCase()];
-    router.push(cred.role === 'admin' ? '/admin' : `/${cred.role}`);
+    const cred = credentials[username.trim().toLowerCase()];
+    router.push(cred?.role === 'admin' ? '/admin' : `/${cred?.role}`);
   };
 
   return (
