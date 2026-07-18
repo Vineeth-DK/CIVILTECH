@@ -29,7 +29,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,52 +206,10 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo credentials */}
-          <div className="border-t border-slate-200/60 dark:border-white/8 pt-4">
-            <button
-              onClick={() => setShowDemo(!showDemo)}
-              className="w-full flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-            >
-              <span>Demo credentials</span>
-              {showDemo ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            </button>
-
-            <AnimatePresence>
-              {showDemo && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-3 space-y-1.5 overflow-hidden"
-                >
-                  {Object.entries(CREDENTIALS).map(([user, cred]) => (
-                    <button
-                      key={user}
-                      type="button"
-                      onClick={() => { setUsername(user); setPassword(cred.password); setError(''); }}
-                      className={cn(
-                        'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs',
-                        'bg-slate-50 dark:bg-white/4 hover:bg-blue-50 dark:hover:bg-blue-500/10',
-                        'border border-slate-200/60 dark:border-white/8 hover:border-blue-300 dark:hover:border-blue-500/30',
-                        'text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300',
-                        'transition-all duration-150 cursor-pointer'
-                      )}
-                    >
-                      <span className="font-semibold capitalize">{user}</span>
-                      <span className="text-slate-400 dark:text-slate-500 font-mono">{cred.password}</span>
-                    </button>
-                  ))}
-                  <p className="text-center text-slate-400 dark:text-slate-600 text-xs pt-1">
-                    Click any row to auto-fill credentials
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
 
         <p className="text-center text-slate-400 dark:text-slate-600 text-xs mt-6">
-          CivilTech Workflow Platform · Demo Mode
+          &copy; 2026 CivilTech. All rights reserved.
         </p>
       </motion.div>
     </div>

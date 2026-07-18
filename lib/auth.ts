@@ -18,5 +18,6 @@ export const CREDENTIALS: Record<string, Credential> = {
   mapping:       { password: 'Map@123',     role: 'mapping',       name: 'Sneha Patel',      dept: 'GIS & Mapping' },
   drawing:       { password: 'Draw@123',    role: 'drawing',       name: 'Anil Desai',       dept: 'Technical Drawing' },
   visualization: { password: 'Viz@123',     role: 'visualization', name: 'Meena Krishnan',   dept: '3D Visualization' },
+  qs_boq:        { password: 'QsBoq@123',   role: 'qs_boq',        name: 'Sanjay Reddy',     dept: 'QS & BOQ' },
   accounts:      { password: 'Accts@123',   role: 'accounts',      name: 'Kavitha Nair',     dept: 'Accounts & Billing' },
 };

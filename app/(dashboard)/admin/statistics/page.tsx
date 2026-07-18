@@ -70,16 +70,23 @@ export default function AdminStatisticsPage() {
 
   const maxWfCount = Math.max(...wfBreakdown.map((w) => w.count), 1);
 
-
+  // Source breakdown
+  const sources = Array.from(new Set(filtered.map(p => p.source || 'Unknown')));
+  const sourceBreakdown = sources.map(src => ({
+    label: src,
+    count: filtered.filter(p => (p.source || 'Unknown') === src).length
+  })).sort((a, b) => b.count - a.count);
+  const maxSourceCount = Math.max(...sourceBreakdown.map(s => s.count), 1);
 
   const handleExport = () => {
-    const header = ['ID', 'Name', 'Client', 'Type', 'Workflow', 'Current Stage', 'Value (INR)', 'Created At', 'Scheduled Date/Deadline', 'Status'];
+    const header = ['ID', 'Name', 'Client', 'Type', 'Workflow', 'Source', 'Current Stage', 'Value (INR)', 'Created At', 'Scheduled Date/Deadline', 'Status'];
     const rows = filtered.map(p => [
       p.id,
       `"${p.name.replace(/"/g, '""')}"`,
       `"${p.client.replace(/"/g, '""')}"`,
       `"${p.type.replace(/"/g, '""')}"`,
       p.workflowType,
+      `"${(p.source || 'Unknown').replace(/"/g, '""')}"`,
       p.currentStage,
       p.value,
       new Date(p.createdAt).toLocaleDateString(),
@@ -223,6 +230,31 @@ export default function AdminStatisticsPage() {
           </div>
         </div>
 
+        {/* ── Source Breakdown ────────────────────────────────────────────── */}
+        {sourceBreakdown.length > 0 && (
+          <div className="glass rounded-2xl overflow-hidden">
+            <div className="px-5 py-3 border-b border-slate-200/50 dark:border-white/5">
+              <h2 className="font-display font-semibold text-slate-900 dark:text-white text-sm">Lead Source Distribution</h2>
+            </div>
+            <div className="p-5 space-y-3">
+              {sourceBreakdown.map(({ label, count }) => (
+                <div key={label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{count}</p>
+                  </div>
+                  <div className="w-full h-2.5 bg-slate-100 dark:bg-white/8 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }} animate={{ width: `${(count / maxSourceCount) * 100}%` }}
+                      transition={{ duration: 0.7, ease: 'easeOut' }}
+                      className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

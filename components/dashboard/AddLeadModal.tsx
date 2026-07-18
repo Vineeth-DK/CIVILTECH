@@ -13,6 +13,8 @@ const PREDEFINED_TYPES = [
   'Boundary Marking', 'Legal Documentation', 'Asbuilt Survey', 'Building Plan', '3D Elevations',
 ];
 
+const LEAD_SOURCES = ['Website', 'Social Media', 'Referral', 'Walk-in', 'Other'];
+
 const WORKFLOW_OPTIONS: { value: WorkflowType; label: string; description: string }[] = [
   { value: 'survey',        label: '🗺️ Survey',           description: 'Survey → Accounts (mapping optional)' },
   { value: 'marking',       label: '📍 Survey + Marking',    description: 'Survey + Mapping notified simultaneously → Accounts' },
@@ -43,6 +45,7 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
   const [form, setForm] = useState<Partial<NewLead> & { customType?: string }>({});
   const [selectedType, setSelectedType] = useState('');
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | ''>('');
+  const [selectedSource, setSelectedSource] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isOther = selectedType === 'Other';
@@ -64,6 +67,7 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
     if (!selectedType)             e.type          = 'Project type is required';
     if (isOther && !form.customType?.trim()) e.customType = 'Please specify the project type';
     if (!selectedWorkflow)         e.workflowType  = 'Workflow type is required';
+    if (!selectedSource)           e.source        = 'Lead source is required';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -73,7 +77,7 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 600));
     const effectiveType = isOther ? (form.customType?.trim() ?? 'Other') : selectedType;
-    addLead({ ...(form as NewLead), type: effectiveType, workflowType: selectedWorkflow as WorkflowType });
+    addLead({ ...(form as NewLead), type: effectiveType, workflowType: selectedWorkflow as WorkflowType, source: selectedSource });
     setIsLoading(false);
     handleClose();
   };
@@ -83,6 +87,7 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
     setForm({});
     setSelectedType('');
     setSelectedWorkflow('');
+    setSelectedSource('');
     setErrors({});
   };
 
@@ -141,6 +146,19 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
                 value={form.customType ?? ''} onChange={(v) => setField('customType', v)} hasError={!!errors.customType} />
             </div>
           )}
+        </Field>
+
+        {/* Lead Source */}
+        <Field label="Lead Source" required error={errors.source}>
+          <div className="relative">
+            <Info className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
+            <select value={selectedSource}
+              onChange={(e) => { setSelectedSource(e.target.value); setErrors((p) => { const n = {...p}; delete n.source; return n; }); }}
+              className={errors.source ? SELECT_ERROR_CLS : SELECT_CLS}>
+              <option value="">Select lead source…</option>
+              {LEAD_SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
         </Field>
 
         {/* Workflow Type */}

@@ -5,8 +5,10 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useProjectStore } from '@/store/useProjectStore';
 import { Project } from '@/types';
-import { Layers, Building2, Phone, MapPin, IndianRupee, Save, AlertTriangle, CalendarClock } from 'lucide-react';
+import { Layers, Building2, Phone, MapPin, IndianRupee, Save, AlertTriangle, CalendarClock, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const LEAD_SOURCES = ['Website', 'Social Media', 'Referral', 'Walk-in', 'Other'];
 
 // Re-use input components locally for the modal
 function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
@@ -57,6 +59,7 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
         client: project.client,
         clientPhone: project.clientPhone,
         location: project.location,
+        source: project.source,
         value: project.value,
         scheduledDate: project.scheduledDate,
         deadline: project.deadline,
@@ -79,6 +82,7 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
     if (!form.clientPhone?.trim() || form.clientPhone.trim().length < 10)
                                    e.clientPhone   = 'Valid phone number required (min 10 digits)';
     if (!form.location?.trim())    e.location      = 'Location is required';
+    if (!form.source?.trim())      e.source        = 'Lead source is required';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -136,6 +140,23 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
           <InputRow icon={<IndianRupee className="w-3.5 h-3.5" />} placeholder="Amount" type="number"
             value={form.value !== undefined ? String(form.value) : ''}
             onChange={(v) => setField('value', v.target.value === '' ? 0 : Number(v.target.value))} />
+        </Field>
+
+        <Field label="Lead Source" required error={errors.source}>
+          <div className="relative">
+            <Info className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
+            <select value={form.source ?? ''}
+              onChange={(e) => setField('source', e.target.value)}
+              className={cn(
+                'w-full h-10 !pl-10 pr-4 rounded-xl border text-sm transition-all appearance-none bg-white dark:bg-slate-900',
+                'text-slate-900 dark:text-slate-100',
+                errors.source ? 'border-red-400 dark:border-red-500/70 focus:ring-red-400/40' : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 focus:ring-blue-500/40 focus:border-blue-400',
+                'focus:outline-none focus:ring-2'
+              )}>
+              <option value="">Select lead source…</option>
+              {LEAD_SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
         </Field>
 
         {isFieldWorkflow && (

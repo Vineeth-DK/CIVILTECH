@@ -41,6 +41,7 @@ export interface NewLead {
   client: string;
   clientPhone: string;
   location: string;
+  source?: string;
   type: string;
   workflowType: WorkflowType;  // determines pipeline
   value?: number;              // project amount — visible to admin/sales/accounts only
@@ -55,6 +56,7 @@ export interface Project {
   client: string;
   clientPhone?: string;
   location: string;
+  source?: string;
   type: string;
   workflowType: WorkflowType;
   priority: Priority;
