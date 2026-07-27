@@ -15,12 +15,12 @@ const PREDEFINED_TYPES = [
 
 const LEAD_SOURCES = ['Website', 'Social Media', 'Referral', 'Walk-in', 'Other'];
 
-const WORKFLOW_OPTIONS: { value: WorkflowType; label: string; description: string }[] = [
-  { value: 'survey',        label: '🗺️ Survey',           description: 'Survey → Accounts (mapping optional)' },
-  { value: 'marking',       label: '📍 Survey + Marking',    description: 'Survey + Mapping notified simultaneously → Accounts' },
-  { value: 'drawing',       label: '✏️ Drawing',          description: 'Technical drawings / CAD → Accounts' },
-  { value: 'visualization', label: '🏗️ 3D Visualization', description: '3D models & renders → Accounts' },
-  { value: 'qs_boq',        label: '📊 QS + BOQ',         description: 'QS + BOQ → Accounts' },
+const WORKFLOW_OPTIONS: { value: WorkflowType; label: string }[] = [
+  { value: 'survey',        label: '🗺️ Survey' },
+  { value: 'marking',       label: '📍 Survey + Marking' },
+  { value: 'drawing',       label: '✏️ Drawing' },
+  { value: 'visualization', label: '🏗️ 3D Visualization' },
+  { value: 'qs_boq',        label: '📊 QS + BOQ' },
 ];
 
 // Shared select class (dark mode compatible)
@@ -90,8 +90,6 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
     setSelectedSource('');
     setErrors({});
   };
-
-  const wfInfo = WORKFLOW_OPTIONS.find((w) => w.value === selectedWorkflow);
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Add New Lead" description="Fill in the project and workflow details">
@@ -172,12 +170,6 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
               {WORKFLOW_OPTIONS.map((w) => <option key={w.value} value={w.value}>{w.label}</option>)}
             </select>
           </div>
-          {wfInfo && (
-            <div className="mt-2 flex items-start gap-2 px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-xs text-blue-700 dark:text-blue-300">
-              <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span>Flow: Sales → {wfInfo.description}</span>
-            </div>
-          )}
         </Field>
 
         {/* Scheduled Date (field visit) — for marking/mapping workflows */}
