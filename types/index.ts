@@ -48,6 +48,7 @@ export interface NewLead {
   scheduledDate?: string;      // for marking/mapping workflows (field visit date)
   deadline?: string;           // for drawing/visualization workflows
   description?: string;
+  gstNumber?: string;
 }
 
 export interface Project {
@@ -83,6 +84,8 @@ export interface Project {
   description: string;
   area?: number;
   mapsLink?: string;
+  isDeleted?: boolean;
+  gstNumber?: string;
 }
 
 export interface User {
@@ -138,6 +141,8 @@ export interface ProjectStore {
   reassignProject: (projectId: string, fromStage: PipelineStage, toStage: PipelineStage, newDate?: string) => void;
   revertProject: (projectId: string, fromStage: PipelineStage, reason: string) => void;
   deleteProject: (projectId: string) => void;
+  restoreProject: (projectId: string) => void;
+  permanentlyDeleteProject: (projectId: string) => void;
   cancelStage: (projectId: string, stage: PipelineStage, reason: string) => void;
   rescheduleStage: (projectId: string, stage: PipelineStage, newDate?: string) => void;
 
@@ -145,4 +150,5 @@ export interface ProjectStore {
   getProjectsByStage: (stage: PipelineStage) => Project[];
   getProjectsByDeptStatus: (stage: PipelineStage, filter: 'all' | StageStatus) => Project[];
   getAllProjects: () => Project[];
+  getDeletedProjects: () => Project[];
 }

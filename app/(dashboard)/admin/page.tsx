@@ -4,8 +4,10 @@ import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart3, Activity, XCircle, CheckCircle2, PlusCircle,
-  TrendingUp, Map, Layers, PenTool, Box, DollarSign, Layers3, Trash2, Pen, Edit3,
+  TrendingUp, Map, Layers, PenTool, Box, DollarSign, Layers3, Trash2, Pen, UploadCloud, RotateCcw, AlertTriangle
 } from 'lucide-react';
+import Papa from 'papaparse';
+import { useRef } from 'react';
 import { useProjectStore } from '@/store/useProjectStore';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { StatsRow } from '@/components/dashboard/StatsRow';
@@ -18,7 +20,7 @@ import { formatDate, formatCurrency, sortByNearestDate } from '@/lib/utils';
 import { PipelineStage, Project } from '@/types';
 import Image from 'next/image';
 
-type ViewFilter = 'active' | 'completed' | 'all' | 'edits';
+type ViewFilter = 'active' | 'completed' | 'all' | 'edits' | 'trash';
 
 const DEPT_SECTIONS: { stage: PipelineStage; label: string; icon: React.FC<{className?: string}>; color: string }[] = [
   { stage: 'sales',         label: 'Sales',            icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' },
@@ -30,12 +32,50 @@ const DEPT_SECTIONS: { stage: PipelineStage; label: string; icon: React.FC<{clas
 ];
 
 export default function AdminPage() {
-  const { getAllProjects, searchQuery, dateFilter } = useProjectStore();
+  const { getAllProjects, getDeletedProjects, searchQuery, dateFilter } = useProjectStore();
   const allProjects = getAllProjects();
+  const deletedProjects = getDeletedProjects();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { addLead } = useProjectStore();
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const data = results.data as any[];
+        let added = 0;
+        data.forEach(row => {
+          if (row.name && row.client && row.workflowType) {
+            addLead({
+              name: row.name,
+              client: row.client,
+              clientPhone: row.clientPhone || '',
+              location: row.location || '',
+              type: row.type as any || 'residential',
+              workflowType: row.workflowType as any,
+              value: Number(row.value) || 0,
+              description: row.description || '',
+            });
+            added++;
+          }
+        });
+        alert(`Successfully imported ${added} projects.`);
+      },
+      error: (error: Error) => {
+        console.error('Error parsing CSV', error);
+        alert('Error parsing CSV');
+      }
+    });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const dateFilteredProjects = useMemo(() => {
     if (dateFilter === 'all') return allProjects;
@@ -59,6 +99,7 @@ export default function AdminPage() {
     { id: 'completed', label: 'Completed',         count: completed.length, color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
     { id: 'all',       label: 'All Projects',      count: dateFilteredProjects.length, color: 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5', activeColor: 'border-violet-500 bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300' },
     { id: 'edits',     label: 'Edit Requests',     count: dateFilteredProjects.filter(p => p.editRequest).length, color: 'border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10', activeColor: 'border-amber-500 bg-amber-500 text-white shadow-md' },
+    { id: 'trash',     label: '🗑 Trash',           count: deletedProjects.length, color: 'border-red-200 dark:border-red-500/20 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10', activeColor: 'border-red-500 bg-red-500 text-white shadow-md' },
   ];
 
   // Filtered set for the pipeline view
@@ -101,7 +142,18 @@ export default function AdminPage() {
               }`}>{chip.count}</span>
             </button>
           ))}
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <input 
+              type="file" 
+              accept=".csv" 
+              ref={fileInputRef} 
+              className="hidden" 
+              onChange={handleFileUpload} 
+            />
+            <button onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/30 transition-all hover:-translate-y-0.5">
+              <UploadCloud className="w-3.5 h-3.5" /> Bulk Import
+            </button>
             <button onClick={() => setIsAddOpen(true)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all hover:-translate-y-0.5">
               <PlusCircle className="w-3.5 h-3.5" /> Add Lead
@@ -162,6 +214,27 @@ export default function AdminPage() {
               </AnimatePresence>
               {filteredProjects.length === 0 && <EmptyPipeline message="No edit requests" sub="All caught up!" />}
             </div>
+          </div>
+        )}
+        {/* ── Trash ─────────────────────────────────────────────────────────── */}
+        {viewFilter === 'trash' && (
+          <div className="glass rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200/50 dark:border-white/5">
+              <div>
+                <h2 className="font-display font-semibold text-red-600 dark:text-red-400 text-sm">🗑 Trash</h2>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Deleted leads — restore or permanently delete</p>
+              </div>
+              <span className="text-xs text-slate-400 dark:text-slate-500">{deletedProjects.length} item{deletedProjects.length !== 1 ? 's' : ''}</span>
+            </div>
+            {deletedProjects.length === 0 ? (
+              <EmptyPipeline message="Trash is empty" sub="Deleted leads will appear here." />
+            ) : (
+              <div className="divide-y divide-slate-100 dark:divide-white/5">
+                <AnimatePresence>
+                  {deletedProjects.map((p, i) => <TrashRow key={p.id} project={p} index={i} />)}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -265,7 +338,7 @@ function AdminProjectRow({ project, index, highlightStage, onEdit }: {
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <span className="text-xs text-slate-400 dark:text-slate-500">{project.client}</span>
             {project.value > 0 && (
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">₹{formatCurrency(project.value)}</span>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(project.value)}</span>
             )}
           </div>
           {cancelRequested && highlightStage && project.stages[highlightStage]?.cancelReason && (
@@ -334,6 +407,74 @@ function EmptyPipeline({ message, sub }: { message: string; sub: string }) {
       </div>
       <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{message}</p>
       <p className="text-slate-400 dark:text-slate-600 text-xs mt-1">{sub}</p>
+    </motion.div>
+  );
+}
+
+// ── Trash Row ─────────────────────────────────────────────────────────────────
+
+function TrashRow({ project, index }: { project: Project; index: number }) {
+  const { restoreProject, permanentlyDeleteProject } = useProjectStore();
+  const [confirming, setConfirming] = useState(false);
+
+  const stageLabel: Record<string, string> = { sales: 'Sales', survey: 'Survey', mapping: 'Mapping', drawing: 'Drawing', visualization: '3D Viz', accounts: 'Accounts' };
+  const stageColors: Record<string, string> = {
+    sales:         'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20',
+    survey:        'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20',
+    mapping:       'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    drawing:       'text-pink-600 dark:text-pink-400 bg-pink-500/10 border-pink-500/20',
+    visualization: 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+    accounts:      'text-sky-600 dark:text-sky-400 bg-sky-500/10 border-sky-500/20',
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }}
+      transition={{ delay: index * 0.03 }}
+      className="px-5 py-3 bg-red-50/30 dark:bg-red-500/5 hover:bg-red-50/60 dark:hover:bg-red-500/8 transition-colors"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+            <span className="text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">{project.id}</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${stageColors[project.currentStage]}`}>{stageLabel[project.currentStage]}</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full border font-semibold text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20">Deleted</span>
+          </div>
+          <h3 className="font-semibold text-slate-700 dark:text-slate-300 text-sm leading-snug line-through opacity-60">{project.name}</h3>
+          <div className="flex items-center gap-3 mt-0.5">
+            <span className="text-xs text-slate-400 dark:text-slate-500">{project.client}</span>
+            {project.value > 0 && (
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(project.value)}</span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+          {/* Restore */}
+          <button
+            onClick={() => restoreProject(project.id)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all"
+          >
+            <RotateCcw className="w-3.5 h-3.5" /> Restore
+          </button>
+          {/* Permanently delete */}
+          {confirming ? (
+            <div className="flex items-center gap-1">
+              <span className="text-[11px] text-red-500 font-medium">Sure?</span>
+              <button onClick={() => permanentlyDeleteProject(project.id)}
+                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-red-500 hover:bg-red-600 text-white transition-colors">Yes</button>
+              <button onClick={() => setConfirming(false)}
+                className="px-2 py-1 rounded-lg text-[11px] font-medium bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/15 transition-colors">No</button>
+            </div>
+          ) : (
+            <button onClick={() => setConfirming(true)}
+              className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 border border-transparent hover:border-red-200 dark:hover:border-red-500/20 transition-all"
+              title="Permanently Delete"
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 }

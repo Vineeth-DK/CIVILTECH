@@ -7,7 +7,7 @@ import {
   StageStatus, StatusFilter, DateFilter, LeadDetails, NewLead, WorkflowType,
 } from '@/types';
 import { useAuthStore } from './useAuthStore';
-import { fetchProjectsDB, upsertProjectDB, deleteProjectDB, subscribeProjectsDB } from '@/lib/supabaseSync';
+import { fetchProjectsDB, upsertProjectDB, deleteProjectDB, permanentlyDeleteProjectDB, subscribeProjectsDB } from '@/lib/supabaseSync';
 
 const now = () => new Date().toISOString();
 const bypassed = (): { status: 'bypassed'; completedAt: string } => ({ status: 'bypassed', completedAt: now() });
@@ -83,6 +83,7 @@ function buildInitialStages(wf: WorkflowType, assignedTo: string, scheduledDate?
 let currentUnsubscribe: (() => void) | null = null;
 
 export const useProjectStore = create<ProjectStore>()(
+  persist(
   (set, get) => ({
     projects: [],
     currentUser: null,
@@ -98,12 +99,35 @@ export const useProjectStore = create<ProjectStore>()(
       if (currentUnsubscribe) currentUnsubscribe();
 
       // Subscribe to real-time changes
-      currentUnsubscribe = subscribeProjectsDB(async () => {
-        // Refetch all projects on any change
-        const latestProjects = await fetchProjectsDB();
-        set({ isSyncing: true, projects: latestProjects });
-        setTimeout(() => set({ isSyncing: false }), 0);
-      });
+      currentUnsubscribe = subscribeProjectsDB(
+        (newProject) => {
+          set((state) => {
+            if (state.projects.find(p => p.id === newProject.id)) return state;
+            return { isSyncing: true, projects: [...state.projects, newProject] };
+          });
+          setTimeout(() => set({ isSyncing: false }), 0);
+        },
+        (updatedProject) => {
+          set((state) => {
+            const index = state.projects.findIndex(p => p.id === updatedProject.id);
+            if (index === -1) return state;
+            // Prevent overwriting if local updatedAt is equal to incoming one (meaning this client made it)
+            // or if local is somehow newer.
+            const local = state.projects[index];
+            if (new Date(local.updatedAt).getTime() >= new Date(updatedProject.updatedAt).getTime()) {
+               return state;
+            }
+            const newProjects = [...state.projects];
+            newProjects[index] = updatedProject;
+            return { isSyncing: true, projects: newProjects };
+          });
+          setTimeout(() => set({ isSyncing: false }), 0);
+        },
+        (deletedId) => {
+          set((state) => ({ isSyncing: true, projects: state.projects.filter(p => p.id !== deletedId) }));
+          setTimeout(() => set({ isSyncing: false }), 0);
+        }
+      );
     },
 
     currentFilter: 'all' as StatusFilter,
@@ -138,7 +162,11 @@ export const useProjectStore = create<ProjectStore>()(
 
       addLead: (lead: NewLead) => {
         const projects = get().projects;
-        const id  = `PRJ-${String(projects.length + 1).padStart(3, '0')}`;
+        const maxNum = projects.reduce((max, p) => {
+          const num = parseInt(p.id.replace('PRJ-', ''), 10);
+          return isNaN(num) ? max : (num > max ? num : max);
+        }, 0);
+        const id  = `PRJ-${String(maxNum + 1).padStart(3, '0')}`;
         const user = get().currentUser;
         const newProject: Project = {
           id,
@@ -153,6 +181,7 @@ export const useProjectStore = create<ProjectStore>()(
           scheduledDate: lead.scheduledDate,
           deadline:     lead.deadline,
           description:  lead.description ?? '',
+          gstNumber:    lead.gstNumber,
           currentStage: 'sales',
           createdAt:    now(),
           updatedAt:    now(),
@@ -478,6 +507,22 @@ export const useProjectStore = create<ProjectStore>()(
 
       deleteProject: (projectId: string) => {
         set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === projectId ? { ...p, isDeleted: true, updatedAt: now() } : p
+          ),
+        }));
+      },
+
+      restoreProject: (projectId: string) => {
+        set((state) => ({
+          projects: state.projects.map((p) =>
+            p.id === projectId ? { ...p, isDeleted: false, updatedAt: now() } : p
+          ),
+        }));
+      },
+
+      permanentlyDeleteProject: (projectId: string) => {
+        set((state) => ({
           projects: state.projects.filter((p) => p.id !== projectId),
         }));
       },
@@ -510,16 +555,26 @@ export const useProjectStore = create<ProjectStore>()(
 
       // ── Selectors ─────────────────────────────────────────────────────────
 
-      getProjectsByStage: (stage: PipelineStage) => get().projects.filter((p) => p.currentStage === stage),
+      getProjectsByStage: (stage: PipelineStage) => get().projects.filter((p) => !p.isDeleted && p.currentStage === stage),
 
       getProjectsByDeptStatus: (stage: PipelineStage, filter: 'all' | StageStatus) => {
-        const touched = get().projects.filter((p) => p.stages[stage]?.status !== 'pending' && p.stages[stage]?.status !== 'bypassed');
+        const touched = get().projects.filter((p) => !p.isDeleted && p.stages[stage]?.status !== 'pending' && p.stages[stage]?.status !== 'bypassed');
         if (filter === 'all') return touched;
         return touched.filter((p) => p.stages[stage]?.status === filter);
       },
 
-      getAllProjects: () => get().projects,
-    })
+      getAllProjects: () => get().projects.filter((p) => !p.isDeleted),
+
+      getDeletedProjects: () => get().projects.filter((p) => p.isDeleted),
+  }),
+  {
+    name: 'civiltech-session',
+    partialize: (state) => ({
+      currentUser: state.currentUser,
+      isDarkMode: state.isDarkMode,
+    }),
+  }
+  )
 );
 
 // Subscribe to store changes to push to Supabase
@@ -527,7 +582,7 @@ useProjectStore.subscribe((state, prevState) => {
   if (state.isSyncing) return;
   if (state.projects === prevState.projects) return;
 
-  // Find added or modified projects
+  // Find added or modified projects (including soft-deletes / restores)
   state.projects.forEach(p => {
     const prev = prevState.projects.find(old => old.id === p.id);
     if (!prev || prev !== p) {
@@ -535,10 +590,10 @@ useProjectStore.subscribe((state, prevState) => {
     }
   });
 
-  // Find deleted projects
+  // Find permanently deleted projects (removed from array entirely)
   prevState.projects.forEach(prev => {
     if (!state.projects.find(p => p.id === prev.id)) {
-      deleteProjectDB(prev.id);
+      permanentlyDeleteProjectDB(prev.id);
     }
   });
 });

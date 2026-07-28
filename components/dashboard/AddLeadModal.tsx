@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { useProjectStore } from '@/store/useProjectStore';
 import { NewLead, WorkflowType } from '@/types';
 import { PlusCircle, Building2, Phone, MapPin, Calendar, Layers, IndianRupee, Info, GitBranch } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const PREDEFINED_TYPES = [
   'Boundary Survey', 'Topography Survey', 'Land Subdivision', 'DGPS Survey',
@@ -46,6 +47,7 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
   const [selectedType, setSelectedType] = useState('');
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | ''>('');
   const [selectedSource, setSelectedSource] = useState('');
+  const [gstRequired, setGstRequired] = useState('no');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isOther = selectedType === 'Other';
@@ -66,8 +68,11 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
     if (!form.location?.trim())    e.location      = 'Location is required';
     if (!selectedType)             e.type          = 'Project type is required';
     if (isOther && !form.customType?.trim()) e.customType = 'Please specify the project type';
-    if (!selectedWorkflow)         e.workflowType  = 'Workflow type is required';
+    if (!selectedWorkflow)         e.workflowType  = 'Designated workflow is required';
     if (!selectedSource)           e.source        = 'Lead source is required';
+    if (gstRequired === 'yes' && !form.gstNumber?.trim()) {
+      e.gstNumber = 'GST number is required';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -76,8 +81,21 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
     if (!validate()) return;
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 600));
-    const effectiveType = isOther ? (form.customType?.trim() ?? 'Other') : selectedType;
-    addLead({ ...(form as NewLead), type: effectiveType, workflowType: selectedWorkflow as WorkflowType, source: selectedSource });
+    const payload: NewLead = {
+      name: form.name!,
+      client: form.client!,
+      clientPhone: form.clientPhone!,
+      location: form.location!,
+      type: isOther ? (form.customType ?? 'Other') : selectedType!,
+      workflowType: selectedWorkflow as WorkflowType,
+      source: selectedSource!,
+      value: form.value ?? 0,
+      scheduledDate: form.scheduledDate,
+      deadline: form.deadline,
+      description: form.description,
+      gstNumber: gstRequired === 'yes' ? form.gstNumber : undefined,
+    };
+    addLead(payload);
     setIsLoading(false);
     handleClose();
   };
@@ -91,40 +109,98 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
     setErrors({});
   };
 
+  // Helpers to prevent timezone shifting in inputs
+  const toLocalDatetime = (isoString?: string) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+
+  const toLocalDate = (isoString?: string) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Add New Lead" description="Fill in the project and workflow details">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Add New Lead" description="Create a new lead and assign it to a workflow.">
       <div className="space-y-4">
 
         {/* Project Name */}
         <Field label="Project Name" required error={errors.name}>
-          <InputRow icon={<Layers className="w-3.5 h-3.5" />} placeholder="e.g. NH-48 Highway Widening"
+          <InputRow icon={<Layers className="w-3.5 h-3.5" />} placeholder="e.g. Layout Marking - Phase 1"
             value={form.name ?? ''} onChange={(v) => setField('name', v)} hasError={!!errors.name} />
         </Field>
 
         {/* Client */}
         <Field label="Client / Company Name" required error={errors.client}>
-          <InputRow icon={<Building2 className="w-3.5 h-3.5" />} placeholder="e.g. Karnataka PWD"
+          <InputRow icon={<Building2 className="w-3.5 h-3.5" />} placeholder="Client Name"
             value={form.client ?? ''} onChange={(v) => setField('client', v)} hasError={!!errors.client} />
         </Field>
 
         {/* Phone */}
         <Field label="Client Phone Number" required error={errors.clientPhone}>
-          <InputRow icon={<Phone className="w-3.5 h-3.5" />} placeholder="+91 98765 43210" type="tel"
+          <InputRow icon={<Phone className="w-3.5 h-3.5" />} placeholder="Phone Number" type="tel"
             value={form.clientPhone ?? ''} onChange={(v) => setField('clientPhone', v)} hasError={!!errors.clientPhone} />
         </Field>
 
         {/* Location */}
         <Field label="Location / Address" required error={errors.location}>
-          <InputRow icon={<MapPin className="w-3.5 h-3.5" />} placeholder="Address or paste Google Maps link"
+          <InputRow icon={<MapPin className="w-3.5 h-3.5" />} placeholder="Site Location"
             value={form.location ?? ''} onChange={(v) => setField('location', v)} hasError={!!errors.location} />
         </Field>
 
         {/* Amount */}
-        <Field label="Project Amount (₹)">
-          <InputRow icon={<IndianRupee className="w-3.5 h-3.5" />} placeholder="e.g. 500000" type="number"
+        <Field label="Project Amount (₹) (Optional)">
+          <InputRow icon={<IndianRupee className="w-3.5 h-3.5" />} placeholder="Amount" type="number"
             value={form.value !== undefined ? String(form.value) : ''}
             onChange={(v) => setField('value', v === '' ? 0 : Number(v))} />
         </Field>
+
+        {/* Description */}
+        <Field label="Description / Scope (Optional)">
+          <div className="relative">
+            <Info className="absolute left-3 top-3 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
+            <textarea
+              value={form.description ?? ''}
+              onChange={(e) => setField('description', e.target.value)}
+              placeholder="Any specific details or requirements…"
+              className="w-full min-h-[80px] py-2.5 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition-all resize-y"
+            />
+          </div>
+        </Field>
+
+        {/* GST Required Dropdown */}
+        <div className="space-y-4">
+          <Field label="GST Required?">
+            <div className="relative">
+              <Info className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
+              <select value={gstRequired}
+                onChange={(e) => {
+                  setGstRequired(e.target.value);
+                  if (e.target.value === 'no') {
+                    setField('gstNumber', '');
+                    setErrors((p) => { const n = {...p}; delete n.gstNumber; return n; });
+                  }
+                }}
+                className={SELECT_CLS}>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </Field>
+
+          {gstRequired === 'yes' && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+              <Field label="GST Number" required error={errors.gstNumber}>
+                <InputRow icon={<Building2 className="w-3.5 h-3.5" />} placeholder="Enter GST Number"
+                  value={form.gstNumber ?? ''} onChange={(v) => setField('gstNumber', v)} hasError={!!errors.gstNumber} />
+              </Field>
+            </motion.div>
+          )}
+        </div>
 
         {/* Project Type */}
         <Field label="Project Type" required error={errors.type || errors.customType}>
@@ -178,8 +254,8 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
               <input type="datetime-local"
-                min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
-                value={form.scheduledDate ? new Date(new Date(form.scheduledDate).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                min={toLocalDatetime(new Date().toISOString())}
+                value={toLocalDatetime(form.scheduledDate)}
                 onChange={(e) => setField('scheduledDate', e.target.value ? new Date(e.target.value).toISOString() : '')}
                 className={`w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all`} />
             </div>
@@ -195,8 +271,8 @@ export function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
               <input type="date"
-                min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}
-                value={form.deadline ? new Date(new Date(form.deadline).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] : ''}
+                min={toLocalDate(new Date().toISOString())}
+                value={toLocalDate(form.deadline)}
                 onChange={(e) => setField('deadline', e.target.value ? new Date(e.target.value).toISOString() : '')}
                 className="w-full h-10 !pl-10 pr-4 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all" />
             </div>

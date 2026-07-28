@@ -7,6 +7,7 @@ import { useProjectStore } from '@/store/useProjectStore';
 import { Project } from '@/types';
 import { Layers, Building2, Phone, MapPin, IndianRupee, Save, AlertTriangle, CalendarClock, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 const LEAD_SOURCES = ['Website', 'Social Media', 'Referral', 'Walk-in', 'Other'];
 
@@ -50,6 +51,7 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
   const { currentUser, requestEdit, editLead } = useProjectStore();
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState<Partial<Project>>({});
+  const [gstRequired, setGstRequired] = useState('no');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -63,7 +65,9 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
         value: project.value,
         scheduledDate: project.scheduledDate,
         deadline: project.deadline,
+        gstNumber: project.gstNumber,
       });
+      setGstRequired(project.gstNumber ? 'yes' : 'no');
       setErrors({});
     }
   }, [project, isOpen]);
@@ -83,6 +87,9 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
                                    e.clientPhone   = 'Valid phone number required (min 10 digits)';
     if (!form.location?.trim())    e.location      = 'Location is required';
     if (!form.source?.trim())      e.source        = 'Lead source is required';
+    if (gstRequired === 'yes' && !form.gstNumber?.trim()) {
+      e.gstNumber = 'GST number is required';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -93,10 +100,11 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
     await new Promise((r) => setTimeout(r, 600));
     
     // Admin saves immediately, Sales sends request
+    const payload = { ...form, gstNumber: gstRequired === 'yes' ? form.gstNumber : undefined };
     if (currentUser.role === 'admin') {
-      editLead(project.id, form);
+      editLead(project.id, payload);
     } else {
-      requestEdit(project.id, form, currentUser.name);
+      requestEdit(project.id, payload, currentUser.name);
     }
     
     setIsLoading(false);
@@ -105,6 +113,21 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
 
   const isFieldWorkflow = project.workflowType === 'marking' || project.workflowType === 'survey';
   const isDeadlineWorkflow = project.workflowType === 'drawing' || project.workflowType === 'visualization';
+
+  // Helpers to prevent timezone shifting in inputs
+  const toLocalDatetime = (isoString?: string) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+
+  const toLocalDate = (isoString?: string) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Lead Details" description={project.name}>
@@ -159,17 +182,50 @@ export function EditLeadModal({ isOpen, onClose, project }: EditLeadModalProps) 
           </div>
         </Field>
 
+        {/* GST Required Dropdown */}
+        <div className="space-y-4">
+          <Field label="GST Required?">
+            <div className="relative">
+              <Info className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
+              <select value={gstRequired}
+                onChange={(e) => {
+                  setGstRequired(e.target.value);
+                  if (e.target.value === 'no') {
+                    setField('gstNumber', '');
+                    setErrors((p) => { const n = {...p}; delete n.gstNumber; return n; });
+                  }
+                }}
+                className={cn(
+                  'w-full h-10 !pl-10 pr-4 rounded-xl border text-sm transition-all appearance-none bg-white dark:bg-slate-900',
+                  'text-slate-900 dark:text-slate-100 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400'
+                )}>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </Field>
+
+          {gstRequired === 'yes' && (
+            <Field label="GST Number" required error={errors.gstNumber}>
+              <InputRow icon={<Building2 className="w-3.5 h-3.5" />} placeholder="Enter GST Number"
+                value={form.gstNumber ?? ''} onChange={(v) => setField('gstNumber', v.target.value)} hasError={!!errors.gstNumber} />
+            </Field>
+          )}
+        </div>
+
         {isFieldWorkflow && (
           <Field label="Scheduled Field-Visit Date">
             <InputRow icon={<CalendarClock className="w-3.5 h-3.5" />} type="datetime-local"
-              value={(form.scheduledDate || '').slice(0, 16)} onChange={(v) => setField('scheduledDate', new Date(v.target.value).toISOString())} />
+              value={toLocalDatetime(form.scheduledDate)} 
+              onChange={(v) => setField('scheduledDate', v.target.value ? new Date(v.target.value).toISOString() : '')} />
           </Field>
         )}
 
         {isDeadlineWorkflow && (
           <Field label="Project Deadline">
             <InputRow icon={<CalendarClock className="w-3.5 h-3.5" />} type="date"
-              value={(form.deadline || '').split('T')[0]} onChange={(v) => setField('deadline', new Date(v.target.value).toISOString())} />
+              value={toLocalDate(form.deadline)} 
+              onChange={(v) => setField('deadline', v.target.value ? new Date(v.target.value).toISOString() : '')} />
           </Field>
         )}
 

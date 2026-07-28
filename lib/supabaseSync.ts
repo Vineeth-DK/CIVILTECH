@@ -21,7 +21,15 @@ export function toDB(p: Project) {
     area: p.area ?? null,
     maps_link: p.mapsLink ?? null,
     stages: p.stages,
+    is_deleted: p.isDeleted ?? false,
   };
+
+  // Only append gst_number if it exists to avoid crashing if the DB column is missing
+  if (p.gstNumber) {
+    (payload as any).gst_number = p.gstNumber;
+  }
+
+  return payload;
 }
 
 export function fromDB(row: any): Project {
@@ -44,6 +52,8 @@ export function fromDB(row: any): Project {
     area: row.area ? Number(row.area) : undefined,
     mapsLink: row.maps_link ?? undefined,
     stages: typeof row.stages === 'string' ? JSON.parse(row.stages) : row.stages,
+    isDeleted: row.is_deleted ?? false,
+    gstNumber: row.gst_number ?? undefined,
   };
 }
 
@@ -62,16 +72,32 @@ export async function upsertProjectDB(p: Project) {
 }
 
 export async function deleteProjectDB(id: string) {
-  const { error } = await supabase.from('projects').delete().eq('id', id);
+  const { error } = await supabase.from('projects').update({ is_deleted: true }).eq('id', id);
   if (error) console.error('Error deleting project', error);
 }
 
-export function subscribeProjectsDB(onUpdate: () => void) {
+export async function permanentlyDeleteProjectDB(id: string) {
+  const { error } = await supabase.from('projects').delete().eq('id', id);
+  if (error) console.error('Error permanently deleting project', error);
+}
+
+
+export function subscribeProjectsDB(
+  onInsert: (p: Project) => void,
+  onUpdate: (p: Project) => void,
+  onDelete: (id: string) => void
+) {
   const channelName = 'projects-changes-' + Math.random().toString(36).substring(7);
   const channel = supabase
     .channel(channelName)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => {
-      onUpdate();
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'projects' }, (payload) => {
+      onInsert(fromDB(payload.new));
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'projects' }, (payload) => {
+      onUpdate(fromDB(payload.new));
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'projects' }, (payload) => {
+      onDelete(payload.old.id);
     })
     .subscribe();
 

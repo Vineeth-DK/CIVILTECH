@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { MapPin, Building2, Calendar, ChevronRight, Phone, ExternalLink, StickyNote, Clock, IndianRupee, XCircle, CalendarClock, AlertCircle, ArrowRightLeft, Pen } from 'lucide-react';
+import { MapPin, Building2, Calendar, ChevronRight, Phone, ExternalLink, StickyNote, Clock, Banknote, XCircle, CalendarClock, AlertCircle, ArrowRightLeft, Pen } from 'lucide-react';
 import { Project, PipelineStage } from '@/types';
 import { StatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -70,6 +70,23 @@ export function ProjectCard({ project, stage, onAction, onEdit, actionLabel, sho
 
   const dateLabel = isFieldStage ? 'Visit' : 'Due';
 
+  // Urgency border — only for active (in_progress) stages
+  // Use stageRecord.scheduledDate → project.scheduledDate → project.deadline (whichever exists first)
+  const urgencyAccent = (() => {
+    if (isCancelled || stageRecord?.status !== 'in_progress') return null;
+    const dateStr =
+      stageRecord?.scheduledDate ??
+      project.scheduledDate ??
+      project.deadline;
+    if (!dateStr) return null;
+    const msUntil = new Date(dateStr).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0);
+    const days = Math.ceil(msUntil / 86_400_000);
+    if (days <= 1) return '!border-red-500 !border-l-red-500 ring-1 ring-red-500 shadow-sm shadow-red-500/20';
+    if (days <= 2) return '!border-yellow-500 !border-l-yellow-500 ring-1 ring-yellow-500 shadow-sm shadow-yellow-500/20';
+    if (days <= 3) return '!border-emerald-500 !border-l-emerald-500 ring-1 ring-emerald-500 shadow-sm shadow-emerald-500/20';
+    return null;
+  })();
+
   return (
     <>
       <motion.div
@@ -82,7 +99,7 @@ export function ProjectCard({ project, stage, onAction, onEdit, actionLabel, sho
           'group relative rounded-2xl border-l-[3px] glass cursor-pointer',
           'hover:shadow-lg hover:shadow-black/6 dark:hover:shadow-black/30 transition-all duration-200',
           isCancelled && 'opacity-75',
-          accent
+          urgencyAccent ?? accent
         )}
         onClick={() => setExpanded(!expanded)}
       >
@@ -133,7 +150,7 @@ export function ProjectCard({ project, stage, onAction, onEdit, actionLabel, sho
             )}
             {showValue && (
               <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                <IndianRupee className="w-3.5 h-3.5 flex-shrink-0" />
+                <Banknote className="w-3.5 h-3.5 flex-shrink-0" />
                 <span>{formatCurrency(project.value)}</span>
               </div>
             )}

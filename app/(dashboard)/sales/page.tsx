@@ -49,10 +49,63 @@ export default function SalesPage() {
 
   const allCancelled = [...cancelledProjects, ...cancelledDownstream];
 
+  // 3-day priority view — projects with scheduledDate or deadline within 3 days
+  const today = new Date(); today.setHours(0,0,0,0);
+  const in3Days = new Date(today); in3Days.setDate(today.getDate() + 3);
+
+  const upcomingProjects = useMemo(() => {
+    return displayed.filter(p => {
+      const dateStr = p.scheduledDate ?? p.deadline;
+      if (!dateStr) return false;
+      const d = new Date(dateStr); d.setHours(0,0,0,0);
+      return d <= in3Days;
+    }).sort((a, b) => {
+      const da = new Date(a.scheduledDate ?? a.deadline ?? '').getTime();
+      const db = new Date(b.scheduledDate ?? b.deadline ?? '').getTime();
+      return da - db;
+    });
+  }, [displayed]);
+
+  function urgencyLabel(dateStr: string): { label: string; color: string } {
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    const days = Math.ceil((d.getTime() - today.getTime()) / 86400000);
+    if (days <= 0) return { label: 'Overdue / Today', color: 'text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20' };
+    if (days === 1) return { label: 'Tomorrow', color: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20' };
+    return { label: `In ${days} days`, color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
+  }
+
+
   return (
     <div className="flex flex-col h-full">
       <Topbar title="Sales" subtitle="Lead management & confirmation" />
       <div className="flex-1 p-5 space-y-5 overflow-y-auto">
+
+        {/* ── 3-Day Priority Panel ─────────────────────────────────────── */}
+        {upcomingProjects.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <Activity className="w-4 h-4 text-red-500" />
+              <h2 className="font-display font-semibold text-slate-900 dark:text-white text-sm">Priority — Next 3 Days</h2>
+              <span className="text-xs font-normal text-slate-400 dark:text-slate-500">{upcomingProjects.length} project{upcomingProjects.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="glass rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/5">
+              {upcomingProjects.map((p) => {
+                const dateStr = p.scheduledDate ?? p.deadline ?? '';
+                const { label, color } = urgencyLabel(dateStr);
+                return (
+                  <div key={p.id} className="px-4 py-3 flex items-center gap-3">
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-lg border whitespace-nowrap ${color}`}>{label}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{p.name}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{p.client}</p>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 flex-shrink-0">{p.id}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* ── Pending Leads ───────────────────────────────────────── */}
         <section>
